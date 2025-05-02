@@ -1,0 +1,62 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\title{Reactivity Checking with \texttt{check\_react\_spec}}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Function Overview}
+
+\texttt{check\_react\_spec(spec)} is a Python function that verifies whether a given GR(1)-style Linear Temporal Logic (LTL) formula is satisfied by a loaded SMV model. It relies on the \texttt{pynusmv} library and is specifically designed to handle formulas of the form:
+
+\[
+  \textbf{GF} \, f \rightarrow \textbf{GF} \, g
+\]
+
+where $f$ and $g$ are Boolean combinations of basic (non-temporal) expressions.
+
+\section*{Function Signature}
+
+\begin{lstlisting}[language=Python]
+check_react_spec(spec) -> Union[Tuple[bool, Optional[execution]], None]
+\end{lstlisting}
+
+\section*{Parameters}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{spec}: an LTL formula parsed from an SMV file, typically of type \texttt{parser.CONTEXT}.
+\end{itemize}
+
+\section*{Returns}
+
+\begin{itemize}[leftmargin=*]
+  \item \texttt{None} if the formula is not in the proper reactive form (\texttt{GF} $f$ $\rightarrow$ \texttt{GF} $g$).
+  \item A tuple \texttt{(True, None)} if the model satisfies the property.
+  \item A tuple \texttt{(False, execution)} if the property is violated, where:
+        \begin{itemize}
+          \item \texttt{execution} is a tuple of alternating states and inputs (as dictionaries),
+          \item The execution ends in a state that repeats earlier in the sequence, indicating
+                a loop.
+        \end{itemize}
+\end{itemize}
+
+\section*{Implementation Notes}
+
+The function supports two counterexample formats returned by NuSMV:
+\begin{enumerate}[label=(\alph*)]
+  \item A 3-tuple of separate lists: \texttt{(states, inputs, loop\_index)}.
+  \item A flat tuple: alternating \texttt{state, input, state, \ldots, state}, from
+        which the loop position is inferred.
+\end{enumerate}
+
+All states and inputs are returned as dictionaries mapping variable names to
+string values.
+
+\end{document}
