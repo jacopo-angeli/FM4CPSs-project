@@ -1,0 +1,52 @@
+%**************************************************************
+% PACKAGES & GRAPHICS SETTINGS
+%**************************************************************
+\usepackage{graphicx}      % For \includegraphics
+\graphicspath{{media/}}    % Folder for image files
+
+\usepackage{xcolor}        % Custom colors
+\definecolor{lightgrey}{RGB}{60,60,60}
+\definecolor{webgreen}{rgb}{0,.5,0}
+\definecolor{webbrown}{rgb}{.6,0,0}
+
+\usepackage{listings}      % Code listings
+
+%**************************************************************
+% PAGE LAYOUT
+%**************************************************************
+\setlength{\parindent}{14pt}   % Indentation of first line
+\setlength{\parskip}{0pt}      % Space between paragraphs
+
+%**************************************************************
+% CAPTIONS SETTINGS
+%**************************************************************
+\usepackage{caption}
+\captionsetup{
+    tableposition=top,
+    figureposition=bottom,
+    font=small,
+    format=hang,
+    labelfont=bf
+}
+
+%**************************************************************
+% ITEMIZE SETTINGS
+%**************************************************************
+\renewcommand{\labelitemi}{$\bullet$}
+% Uncomment to customize deeper levels
+% \renewcommand{\labelitemii}{$\cdot$}
+% \renewcommand{\labelitemiii}{$\diamond$}
+% \renewcommand{\labelitemiv}{$\ast$}
+
+%**************************************************************
+% TEXT UTILITIES & MACROS
+%**************************************************************
+\newcommand{\omissis}{[\dots\negthinspace]}  % Ellipsis
+\newcommand{\sectionname}{sezione}
+\newcommand{\intro}[1]{\emph{\textsf{#1}}}
+\newcommand{\classdesc}[2]{\item[\textbf{#1:}] #2}
+
+%**************************************************************
+% TABLE SPACING
+%**************************************************************
+\renewcommand*{\arraystretch}{1.5}
