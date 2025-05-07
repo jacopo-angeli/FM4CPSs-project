@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<title>Formal Methods for Cyber-Physical Systems</title>
+
+			<!-- MathJAX -->
+			<script>
+				MathJax = {
+					tex: {
+						inlineMath: [
+							["$", "$"],
+							["\\(", "\\)"],
+						],
+					},
+				};
+			</script>
+			<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+			<!-- Bootstrap CSS -->
+			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+			<!-- Google Fonts -->
+			<link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Anton SC+SC&display=swap" rel="stylesheet" />
+			<link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Cutive+Mono&family=Raleway:wght@300;400;600;800&display=swap" rel="stylesheet" />
+
+			<style>
+				:root {
+					--bg: #121212;
+					--text: #f5f5f5;
+					--subtitle: #d1d0d0;
+					--accent: #88c0d0;
+					--divider: #333;
+				}
+
+				* {
+					text-align: justify;
+				}
+
+				body {
+					background: var(--bg);
+					color: var(--text);
+					font-family: "Raleway", sans-serif;
+					line-height: 1.7;
+					padding: 3rem 1rem;
+					counter-reset: section;
+				}
+
+				.container {
+					max-width: 800px;
+					margin: auto;
+				}
+
+				strong {
+					color: var(--accent);
+					font-family: "Anton SC", sans-serif;
+					font-weight: normal;
+				}
+
+				h1 {
+					font-family: "Anton SC", sans-serif;
+					color: var(--accent);
+					text-align: center;
+					margin-bottom: 3rem;
+					letter-spacing: 1px;
+				}
+
+				section {
+					margin-bottom: 3rem;
+					padding-bottom: 1.5rem;
+					border-bottom: 1px solid var(--divider);
+					counter-increment: section;
+				}
+
+				h2 {
+					position: relative;
+					font-family: "Anton SC", sans-serif;
+					color: var(--accent);
+					margin-bottom: 1.5rem;
+					font-size: 1.75rem;
+					letter-spacing: 0.5px;
+				}
+				h2::before {
+					content: counter(section, decimal-leading-zero);
+					position: absolute;
+					bottom: 0;
+					left: -3rem;
+					font-size: 4rem;
+					line-height: 1;
+					color: rgba(136, 192, 208, 0.15);
+					font-family: "Anton SC", sans-serif;
+				}
+
+				h3 {
+					font-family: "Anton SC", sans-serif;
+					color: var(--text);
+					margin-top: 2rem;
+					margin-bottom: 1rem;
+					font-size: 1.3rem;
+					letter-spacing: 0.3px;
+				}
+				h4 {
+					font-family: "Anton SC", sans-serif;
+					color: var(--text);
+					margin-top: 2rem;
+					margin-bottom: 1rem;
+					font-size: 1.2rem;
+					letter-spacing: 0.3px;
+				}
+        h5 {
+					font-family: "Anton SC", sans-serif;
+					color: var(--text);
+					margin-top: 2rem;
+					margin-bottom: 1rem;
+					font-size: 1.1rem;
+					letter-spacing: 0.3px;
+				}
+
+				code,
+				.mono {
+					font-family: "Cutive Mono", monospace;
+					color: var(--accent);
+					background: rgba(136, 192, 208, 0.1);
+					padding: 0.2rem 0.4rem;
+					border-radius: 3px;
+				}
+
+				ul {
+					padding-left: 1.5rem;
+					color: var(--subtitle);
+					margin-bottom: 1.5rem;
+				}
+				ul ul {
+					margin-top: 0.75rem;
+				}
+				ul li {
+					margin-bottom: 0.5rem;
+				}
+
+				p {
+					margin-bottom: 1.5rem;
+				}
+
+				a {
+					color: var(--accent);
+					text-decoration: none;
+					transition: opacity 0.2s ease;
+				}
+				a:hover {
+					opacity: 0.8;
+				}
+			</style>
+		</head>
+		<body>
+			<div class="container">
+				<h1>Formal Methods for Cyber-Physical Systems</h1>
+
+				<section id="introduction">
+					<h2>Introduction</h2>
+
+					<h3>Definition of Cyber-Physical Systems</h3>
+					<p>
+						A Cyber-Physical System (CPS) is defined as an <strong>integration of computation with physical processes</strong>. It consists of a collection of computing devices that communicate with one another and
+						<strong>interact with the physical world via sensors and actuators in a feedback loop</strong>. In CPS, embedded computers and networks monitor and control physical processes, with feedback loops where physical processes affect computations and vice versa. The design of such systems
+						requires understanding the joint dynamics of computers, software, networks, and physical processes. The concept of a cyber-physical system is a <strong>generalization of embedded systems</strong>. While embedded systems are integrated within mechanical or electrical systems for specific
+						purposes, CPS challenges stem significantly from their interaction with physical processes.
+					</p>
+
+					<h3>Examples & Applications</h3>
+					<p>CPS are increasingly pervasive in modern societies, found everywhere from smart buildings to medical devices to automobiles. Examples and applications include:</p>
+					<ul>
+						<li><strong>MRI Scanners</strong>.</li>
+						<li><strong>Autonomous Mobile Robots</strong> tasked with identification and retrieval, equipped with sensors like GPS, cameras, and infrared sensors, and coordinating via wireless links.</li>
+						<li><strong>Heart Surgery Systems</strong> that allow surgeons to operate on a beating heart using robotically controlled tools.</li>
+						<li>Controllers in <strong>aircraft</strong>, <strong>trains</strong>, and <strong>cars</strong> (such as fly-by-wire systems, cruise control, engine management, brakes, airbags, audio systems).</li>
+						<li><strong>Medical devices</strong> such as pacemakers that monitor and respond to heart pulsations.</li>
+						<li><strong>Industrial Automation</strong>, including robots on a factory floor and control in power generation and chemical plants.</li>
+						<li>Monitoring infrastructure like <strong>bridges</strong>.</li>
+					</ul>
+
+					<h3>Key Features of CPS</h3>
+					<ul>
+						<li>
+							<strong>Reactive vs. Functional Computation</strong>: Unlike classical functional computation focused on producing outputs from inputs, CPS are <strong>reactive systems</strong>, interacting continuously with their environment via inputs and outputs. Their behavior is naturally
+							described by sequences of observed inputs and outputs, and correctness relates to acceptable sequences.
+						</li>
+						<li>
+							<strong>Concurrency</strong>: Many things happen simultaneously in CPS, reflecting the intrinsically concurrent nature of the physical world. Software, rooted in sequential abstractions, must bridge this gap using concurrency mechanisms like interrupts and multitasking. Understanding
+							models and design principles for concurrent computation is critical. Models can be <strong>synchronous</strong> (components execute in lock-step in synchronized rounds) or <strong>asynchronous</strong> (components execute at independent speeds, exchanging messages). Both types are
+							useful for CPS design.
+						</li>
+						<li>
+							<strong>Feedback Control and Physical Dynamics</strong>: CPS involve controllers that interact with the physical world via sensors and actuators. Modeling the continuous evolution of physical quantities, often using differential equations (dynamical systems), is essential for design
+							and analysis. Feedback control systems are a canonical example of CPS, where overall system properties emerge from the composition of cyber and physical parts.
+						</li>
+						<li>
+							<strong>Real-Time Constraints and Scheduling</strong>: CPS often require <strong>robust and predictable designs with repeatable temporal dynamics</strong>. Controlling timing in concurrent programs and meeting real-time constraints are significant design challenges. This involves
+							understanding processor features that affect execution time.
+						</li>
+						<li>
+							<strong>Safety-Critical Assurances</strong>: Many CPS are used in safety-critical applications. It is essential to certify that these systems meet precise requirements, known as <strong>specification</strong> or <strong>properties</strong>. Formal specifications, providing a
+							mathematically precise description of desired behavior, are crucial for ensuring safety ("nothing bad ever happens") and enabling automatic verification techniques.
+						</li>
+					</ul>
+				</section>
+
+				<section id="modeling">
+					<h2>Modeling Cyber-Physical Systems</h2>
+					<p>
+						Developing Cyber-Physical Systems requires a systematic approach, starting with understanding the system through imitation, known as modeling. Models specify what a system does. Models are descriptions of certain aspects of a system intended to yield insight into its properties. In this
+						course, models will have mathematical properties that enable systematic analysis.
+					</p>
+
+					<h3>Functional vs reactive computation</h3>
+					<p>First we need to analyze the difference between functional and reactive computation. Names do help in understanding, but why?</p>
+					<p>
+						In functional computation the program can be represented as a mathematical function that maps inputs to outputs:$$ f:X\mapsto Y$$where X is the input domain and Y is the output domain. The program as a function can be formally studied and validated by analyzing the function, and static
+						analysis in particular, allow us to reason about the program without executing it.
+					</p>
+					<p>
+						In reactive computation, the program continuously interacts with the external environment, system usually does not terminate, furthermore they does not produce an output. To verify these kinds of system, the reasoning needs to be done on its behavior over time. Imagine a tree with the
+						initial state as the root and with a branch for every possible transition, the goal is to check if there exists a branch that leads to unacceptable states, that indicates a flaw in the design.
+					</p>
+
+					<h3>Sequential cs concurrent computation</h3>
+					<p>In sequential computation models, computation consists of a well-defined sequence of instructions executed in a specific order, a process that is well understood and can be modeled by Turing machines.</p>
+					<p>
+						Concurrent computation involves multiple processes or components that evolve independently, leading to non-deterministic behavior. Concurrency can be logical, where multiple processes share the same computing resource and execute in parallel through mechanisms like time slicing, or
+						physical, where processes run simultaneously on separate computing resources.
+					</p>
+					<p>
+						Both synchronous and asynchronous concurrency can be implemented logically or physically. In synchronous concurrency, processes proceed in a coordinated manner, often relying on a global clock or explicit synchronization points to align their execution, leading to a predictable timing
+						and order of interactions. In asynchronous concurrency, processes evolve independently, without requiring alignment in time, interacting through mechanisms like message passing or event-driven communication.
+					</p>
+
+					<h3>Formal Models</h3>
+					<p>The goal of modeling in system design is to provide <strong>mathematical abstractions</strong> to manage complexity. These abstractions describe system designs. CPS commonly combine both discrete and continuous dynamics.</p>
+					<ul>
+						<li>
+							<strong>Continuous Dynamics</strong>: Physical processes evolve continuously, often obeying laws of physics. Modeling techniques include ordinary differential equations (ODEs), a venerable toolkit for engineers. These models capture the evolution of physical quantities. Feedback
+							control systems, where properties emerge from the composition of cyber and physical parts, are a canonical example of CPS.
+						</li>
+						<li>
+							<strong>Discrete Dynamics</strong>: Software behavior is better reflected by discrete dynamics. State machines are a principal formalism for discrete dynamics. Other models include transition systems and discrete-event systems (DES). Automata or extended finite state machines are used
+							to represent the uncontrolled system or "plant" in model-based control development.
+						</li>
+						<li>
+							<strong>Hybrid Systems</strong>: CPS integrate physical dynamics and computational systems, naturally leading to models that combine both discrete and continuous dynamics. Hybrid system models are often simpler and more understandable than models restricted to only one dynamic style.
+							Hybrid systems can be understood and designed by analyzing mode transitions using state machine tools and time-based behavior using continuous analysis tools. Formal models for hybrid systems, such as hybrid automata, combine discrete transition systems with differential/algebraic
+							equations.
+						</li>
+					</ul>
+
+					<h3>Modeling a SRC</h3>
+					<p>
+						Synchronous reactive component is a conceptual model used in the design of real-time and embedded systems, based on the principles of synchronous programming. It originates from the development of synchronous programming languages in the 1980s, such as Esterel, Lustre, and Signal, which
+						were designed to meet the demands of high-reliability systems like avionics, automotive control, and industrial automation.
+					</p>
+					<p>Represented by the following tuple $$\{Q_I, Q_O, Q_S, [\![Init]\!], [\![React]\!]\}$$ where</p>
+					<ul>
+						<li>\(Q_I\): The set of all possible inputs, which includes every combination of the component's input variables \(I\),</li>
+						<li>\(Q_O\): The set of all possible outputs, including every combination of the component's output variables \(O\)</li>
+						<li>\(Q_S\): The set of all possible states of the component. This includes the internal state variables \(S\), where \(Q_S\) represents every possible combination of these state variables,</li>
+						<li>\([\![Init]\!]\): A sequence of assignments that define the initial states of the component's state variables. The set of initial states is a subset of \(Q_S\) written as \([\![Init]\!] \subseteq Q_S\),</li>
+						<li>
+							\([\![React]\!]\): A sequence of assignments and conditionals that execute in each round. This defines the behavior of the component by specifying transitions based on inputs, states, and outputs. Mathematically, the code fragment satisfies: $$[\![React]\!] \subseteq Q_S \times Q_I
+							\times Q_O \times Q_S $$
+						</li>
+					</ul>
+
+					<h3>Multiple reactions</h3>
+					<p>
+						The reaction code in synchronous reactive components may allow for multiple behaviors depending on the state and input combinations. For instance, in a system with nondeterministic reactions, the same input and state may produce multiple possible outputs or new states, meaning the output
+						or transition is not unique. Alternatively, components may exhibit blocking behavior, where not all inputs are acceptable in certain states. This leads to cases where the set of reactions may be empty, as the system cannot react to specific state/input combinations.
+					</p>
+
+					<h3>Syntax errors</h3>
+					<p>In a SRC the react code needs to satisfy the following requirements:</p>
+					<ul>
+						<li>Types of variables and expression should match,</li>
+						<li>Output variables must be written before being read,</li>
+						<li>Output variables must be explicitly assigned a value,</li>
+						<li>Input variables cannot be written</li>
+					</ul>
+					<p>If one of the above requirement isn't met then \([\![React]\!] = \emptyset\).</p>
+
+					<h3>Events</h3>
+					<p>
+						An Event is a variable type that can either be present or absent, and when an Event exists, it has a specific value. This concept is similar to the "Option" type in functional programming, which can be either "None" (absent) or "Some(value)" (present with a value). Events can represent
+						various data types, such as integers, booleans, or custom objects. For example <em>bool option</em> can assume the following values \(\{None, \{true, false\} \in Some\}\), similarly:
+					</p>
+					<ul>
+						<li>\(event\) \(x = \{\bot, \top\}\)</li>
+						<li>\(event\) \( \space(bool) = \{\bot, 0,1\}\),</li>
+						<li>\(event\) \( \space(int) = \{\bot, 0,1,2,...\}\),</li>
+					</ul>
+					<p>To check if an Event is present, the "?" operator is used (\(x?\)), and to assign a value to an Event, the "!" operator is used (\(x!v\)).</p>
+					<p>
+						An event output variable is initially absent unless a value is explicitly assigned to it during an update. This makes them particularly useful in event-triggered components, which execute only when input events are present. This approach is tied to the concept of a "clock," which can
+						vary across different components.
+					</p>
+
+					<h3>Composition of Models</h3>
+					<p>We have seen how to design a simple single component. In this section we are going to formally define the composition of different components.</p>
+					<section>
+						<h4>Instantiation or renaming</h4>
+						<p>Duplication of a component where there is an explicit renaming of the input/output variables and an implicit renaming of the state variables, denoted as follows $$C' =C[out \rightarrow out']$$</p>
+
+						<h4>Parallel composition</h4>
+						<p>A parallel composition is defined as follows: $$C'' =C \|C' $$</p>
+						<section>
+							<h5>Requirements for composition</h5>
+							<ul>
+								<li>They cannot have common output variables,</li>
+								<li>They cannot have common state variables,</li>
+							</ul>
+							<p>However, they can share input variables, and an input variable of one component can serve as an output for the other.</p>
+
+							<h5>Defintion of \([\![React'']\!]\)</h5>
+							<p>The reaction code is not trivial to define because:</p>
+							<ul>
+								<li>Execution order is unknown,</li>
+								<li>Cyclic dependencies may arise.</li>
+							</ul>
+							<p>To address these issues, the reaction code is split into tasks, where each task is an atomic block of code.</p>
+							<p>A task set is defined as $$\{A, \prec\}$$ where each task \(a \in A\) has:</p>
+							<ul>
+								<li><strong>Read-set</strong>: \(R\subseteq\{I \cup S \cup O \cup L\}\)</li>
+								<li><strong>Write-set</strong>: \(W\subseteq\{S \cup O \cup L\}\)</li>
+								<li><strong>Update function</strong>: \([\![Update]\!]\subseteq\{Q_R \times Q_W\}\)</li>
+							</ul>
+							<p>Tasks are defined with a precedence realation \(\prec\), which forms a directed graph:</p>
+							<ul>
+								<li>Nodes represent tasks,</li>
+								<li>Edges represent precedence constraints.</li>
+							</ul>
+							<p>However, some task may be independent and have no order constraints.</p>
+
+							<h5>Task set requirements</h5>
+							<ol>
+								<li><strong>Acyclic precedence relation</strong>The precedence graph must be acyclic (at least one valid schedule exists).<br />If \(a \prec^+ a'\), task \(a\) must precede \(a'\) in every valid schedule.</li>
+								<li><strong>Unique write-set for output variables</strong>Each output variable \(y\) is updated by exactly one task \(a\).<br />If \(a\) reads a variable \(x\) (or another task \(a'\) precedes \(a\) and reads \(x\)), there is a dependency: \(y \succ x\).</li>
+								<li><strong>Write before read</strong>Any variable \(x\) in a read-set of a task \(a\) must be written by at least one other task \(a'\) first.</li>
+								<li><strong>Order write conflicts</strong>If a variable \(x\) is written by \(a\) and read by \(a'\), the execution order must be fixed (\(a\prec^+ a'\) or \(a'\prec^+ a\)) to ensure deterministic behavior.</li>
+							</ol>
+						</section>
+
+						<h5>Compatibility between components</h5>
+						<p>Two components \(C_1\) and \(C_2\) are compatible if:</p>
+						<ul>
+							<li><strong>They have no common outputs</strong>: \(O1 \cap O2 = \emptyset \).</li>
+							<li><strong> combined precedence relation is acyclic</strong>: \(\succ_1 \cup \succ_2\)</li>
+						</ul>
+					</section>
+
+					<p>Complicated systems should be described as compositions of simpler systems. Understanding how components interact is crucial.</p>
+					<ul>
+						<li>
+							<strong>Concurrency</strong>: The physical world is intrinsically concurrent, with many things happening simultaneously. Software, being mostly sequential, must be reconciled with this concurrency, which is a major design challenge and risk factor in embedded systems. Concurrent
+							composition of state machine models is a technique for addressing this.
+						</li>
+						<li>
+							<strong>Synchronous vs. Asynchronous Modeling</strong>: Models for concurrent computation broadly fall into two categories. In <strong>synchronous models</strong>, components execute in lock-step, progressing in synchronized rounds. In <strong>asynchronous models</strong>, components
+							execute at independent speeds, exchanging information via messages. Both types are useful for CPS design. Synchronous composition is one way to achieve concurrent composition.
+						</li>
+						<li>
+							<strong>Models of Computation (MoCs)</strong>: Different forms of interaction between components and their environment lead to different classes of models or Models of Computation. Synchronous-reactive and dataflow models are examples. MoCs are particularly useful for modeling
+							cyber-physical systems.
+						</li>
+					</ul>
+
+					<h3>Model-Based Design</h3>
+					<p>Model-based design is a key discipline in designing CPS. It involves using models throughout the development process, from initial analysis of user requirements to specifying dynamics and control.</p>
+					<ul>
+						<li><strong>Block Diagrams</strong>: These are widely used in industrial design tools like Simulink, Modelica, and LabView. They provide a visual way to structure and compose systems.</li>
+						<li>
+							<strong>Designing Components</strong>: The basic unit of modeling is a component that interacts with its environment via inputs and outputs. The dynamics of a component are described by specifying its initial states and how it reacts to a given input in each state. Precise syntax and
+							semantics are needed for formal analysis.
+						</li>
+					</ul>
+
+					<h3>Modeling Formalisms and Languages</h3>
+					<p>Various formalisms and tools are used to model CPS, reflecting their heterogeneous nature.</p>
+					<ul>
+						<li>Formalisms include state machines, transition systems, extended state machines, networks of automata, hybrid automata, and timed automata. Petri nets can also be used as a specification formalism that exploits parallel character.</li>
+						<li>
+							Modeling tools and languages include <strong>Simulink</strong> and <strong>Stateflow</strong> (from Mathworks), <strong>Modelica</strong>, <strong>LabView</strong> (from National Instruments), and <strong>Ptolemy</strong>. For formal verification, tools like <strong>NuSMV</strong>,
+							<strong>Spin</strong>, and <strong>Uppaal</strong> are used, often with specific modeling languages like those based on synchronous reactive components or interacting timed automata. Academic tools like CIF 3 and mCRL2 also support modeling and analysis.
+						</li>
+					</ul>
+				</section>
+
+				<section id="specification-verification">
+					<h2>Formal Specification</h2>
+					<p>
+						To ensure that Cyber-Physical Systems (CPS) function correctly, especially in safety-critical applications, it is essential to formally specify system requirements and verify that the system meets these specifications [1-3]. Formal methods provide a mathematical basis for modeling,
+						specifying, and analyzing ICT systems [4].
+					</p>
+
+					<h3>Formal Requirements / Specification</h3>
+					<p>Every system should be designed to meet certain requirements [2]. A design without specifications cannot be right or wrong; it can only be surprising [5]. Requirements are desirable properties of the executions of the system [6].</p>
+					<ul>
+						<li>
+							<strong>Informal vs. Formal Requirements</strong>: Requirements can be informal, such as implicit properties or statements in documents written in natural language like English [3, 6, 7]. For high-assurance or safety-critical systems, requirements should be formal, meaning they are
+							stated explicitly in a mathematically precise manner [3, 6, 7]. Formalizing requirements is a challenging task, and the designer may not always be sure that the list is complete [8].
+						</li>
+						<li>
+							<strong>Requirements vs. System</strong>: There should be a clear separation between requirements (what needs to be implemented) and the system (how it is implemented) [6]. The property specification prescribes what the system should or should not do, while the model description
+							addresses how the system behaves [9].
+						</li>
+						<li><strong>Desired Properties / Specifications</strong>: Requirements, also called properties or specifications, precisely state the properties that the system must have to function properly and safely [2, 5, 10].</li>
+						<li><strong>Properties of Executions</strong>: Requirements are properties that must hold over time for a system and describe desired or undesired behaviors of its executions [6, 11].</li>
+						<li>
+							<strong>Safety Properties</strong>: Safety requirements assert that "nothing bad ever happens" [1, 12-15]. Violation of a safety requirement can be demonstrated by a finite execution that illustrates the undesirable behavior, leading from an initial state to an erroneous state [13,
+							16]. Safety monitors can be used to formalize safety requirements, where the verification problem reduces to checking if an execution leads the monitor to an error state [12, 13]. Regular safety properties are those whose bad prefixes constitute a regular language [17].
+						</li>
+						<li>
+							<strong>Liveness Properties</strong>: Liveness requirements assert that "something good eventually happens" [1, 13, 14]. Violation of a liveness requirement is not shown by a finite execution but by a cycle of states reachable from an initial state, which, when executed repeatedly,
+							means the liveness demand is unmet [16]. Formalization of liveness requirements considers infinite executions of the system [16].
+						</li>
+						<li>
+							<strong>Temporal Logic</strong>: Temporal logic is a natural formalism for specifying requirements about infinite executions and can express both safety and liveness properties [11, 14, 16, 18]. It extends traditional propositional logic with operators referring to system behavior over
+							time [14].
+							<ul>
+								<li><strong>Linear Temporal Logic (LTL)</strong>: LTL is a classical temporal logic for specifying linear-time properties [11, 16, 18-20]. It forms the core of the Property Specification Language (PSL) [16]. Automata-based algorithms are used for LTL model checking [18-22].</li>
+								<li><strong>Computation Tree Logic (CTL)</strong>: CTL is a branching-time temporal logic [19, 20, 23]. It can be compared to LTL [19, 20, 22].</li>
+								<li><strong>µ-calculus</strong>: The propositional µ-calculus is another logical formalism mentioned in the sources [23, 24].</li>
+							</ul>
+						</li>
+						<li>
+							<strong>Invariants</strong>: Invariants are the simplest but most important kind of system requirements [25]. An invariant classifies states into safe and unsafe and asserts that no unsafe state is encountered during execution [25]. Safety requirements can be formalized using
+							invariants [12, 13]. Inductive invariants are a general technique for proving that a system satisfies its safety specification [12]. Automated invariant verification techniques exist [12].
+						</li>
+						<li>
+							<strong>Specifications using Models</strong>: An alternative way to give requirements is to provide a model as a specification [10, 26]. Typically, such a specification model is quite abstract and may exhibit more behaviors than an implementation, but it explicitly excludes undesired
+							or dangerous behaviors [10]. Automata can serve as specifications for desired behaviors [27].
+						</li>
+					</ul>
+
+					<h3>Formal Verification</h3>
+					<p>Formal verification aims to establish a mathematical proof that a system works correctly [4, 28]. The goal is to check automatically if the system respects the specification [29]. This process involves comparing a system model (or program) against formal requirements [28-30].</p>
+					<ul>
+						<li><strong>Model / Program vs. Requirements</strong>: Formal verification checks whether a given system satisfies its formal specification [31]. This involves checking if the system model satisfies the specification, which is a mathematical statement to be proved or disproved [28].</li>
+						<li>
+							<strong>Verifier / Model Checker</strong>: Automated verification is typically performed by a software tool called a verifier [32]. Model checking is an algorithmic technique for determining whether a system satisfies a formal specification, often expressed as a temporal logic formula
+							[31].
+						</li>
+						<li><strong>Verification Algorithm</strong>: The verifier employs analysis techniques and algorithms to perform the check [29, 32].</li>
+						<li>
+							<strong>Answer / Counterexample</strong>: The verifier determines if the model satisfies the specification and returns an answer (Yes/proof or No/bug) along with relevant diagnostic information [29, 30, 32]. If a property is violated, the model checker can provide a counterexample,
+							which is an execution path leading to the undesired state [7, 9]. For safety requirements, a counterexample is a finite execution [13].
+						</li>
+						<li>
+							<strong>Automated Verification</strong>: A primary goal is to automate verification as much as possible [30, 32]. Computer-aided verification provides tools to help detect logical errors early in the design process [28]. While analysis problems are often undecidable or computationally
+							hard, many recent advances and heuristics make analysis feasible for interesting classes of systems [32].
+						</li>
+						<li>
+							<strong>Analysis Techniques</strong>:
+							<ul>
+								<li>
+									<strong>Dynamic Analysis (Runtime Execution, Simulation)</strong>: This involves executing the system, potentially multiple times with different inputs, to check if every execution meets the requirement [30]. Simulation is a powerful tool for validating specifications in the
+									concept-development phase [33] and can help find simpler modeling errors [14]. Numerical simulation is used for continuous dynamics [34].
+								</li>
+								<li><strong>Static Analysis (Design time)</strong>: This analyzes the source code or the model for bugs at design time [30].</li>
+								<li><strong>Invariant Verification</strong>: Techniques exist for automatically establishing invariants of transition systems [12].</li>
+								<li>
+									<strong>Reachability Analysis</strong>: Reachability analysis is a technique for analyzing the large number of possible dynamic behaviors of a model [5]. Reachability problems can be used to formalize safety requirements [13]. Enumerative and symbolic search algorithms are used for
+									state-space exploration, including reachability analysis [12, 35]. Set-based reachability analysis is used for hybrid systems [36].
+								</li>
+								<li>
+									<strong>State-space exploration</strong>: Model checking involves exploring possible dynamic behaviors [5]. Verifiers examine relevant system states [9]. Techniques like enumerative and symbolic search algorithms are used for state-space exploration [12]. State-space explosion
+									remains a hurdle due to the high computational complexity [8, 37].
+								</li>
+								<li>
+									<strong>Symbolic Algorithms</strong>: These algorithms operate on sets of states, rather than individual states [38, 39].
+									<ul>
+										<li><strong>Symbolic Model Checking</strong>: This is a specific technique for automated verification [39, 40].</li>
+										<li>
+											<strong>Reduced Ordered Binary Decision Diagrams (ROBDD / BDD)</strong>: BDDs are a data structure commonly used in symbolic model checking and hardware verification for representing sets of states and transitions efficiently [12, 37, 41, 42]. NuSMV uses BDD-based symbolic
+											state-space exploration [43, 44].
+										</li>
+									</ul>
+								</li>
+								<li>
+									<strong>Verification for Hybrid Systems</strong>: Verification of hybrid systems, which combine discrete and continuous dynamics, is a specific area of study [36]. Techniques include proof methods based on barrier certificates and symbolic search algorithms for classes like timed
+									automata and linear hybrid automata [41]. Decidability results and tools for verification exist [36, 45, 46].
+								</li>
+								<li>
+									<strong>Quantitative Analysis</strong>: This involves analyzing quantitative properties of embedded software, such as bounds on resource consumption, including execution time, energy, and memory usage [5]. Execution time analysis is essential for achieving real-time behavior [5].
+								</li>
+							</ul>
+						</li>
+						<li>
+							<strong>Automata-theoretic approach</strong>: An alternative approach to using temporal logic for specifying requirements is to use automata [27]. A module is viewed as a generator of a formal language (sequences of observations), and the requirement is specified by an automaton that
+							accepts only the desired behaviors [27]. Verification reduces to a language-inclusion problem [27]. This approach is extended to liveness requirements using omega-automata and omega-languages [15, 21, 22, 47].
+						</li>
+					</ul>
+
+					<h3>Comparison of Models/Specifications</h3>
+					<p>
+						Formal methods also provide techniques for comparing specifications and models [5]. Comparing transition systems, possibly at different abstraction levels, is useful for relating or comparing systems [48]. These mechanisms help check conformance of a design against a specification [49].
+					</p>
+					<ul>
+						<li><strong>Equivalence and Refinement</strong>: These are fundamental ways to compare state machines and other modal models [26, 49]. Refinement relations help determine when one design can safely replace another or correctly implements a specification [50].</li>
+						<li><strong>Trace Equivalence/Containment</strong>: This compares models based on the sequences of valuations of inputs and outputs, or system behaviors/executions [26, 49-51]. Trace containment is a way to compare dynamic properties [5].</li>
+						<li><strong>Simulation</strong>: Simulation relations compare state trajectories of machines [26, 49, 51-54]. They are weaker than bisimulation [50, 51].</li>
+						<li>
+							<strong>Bisimulation (Strongest equivalence)</strong>: Bisimulation relations establish a correspondence between states in two machines [26, 50, 51, 53]. If a bisimulation exists, two nondeterministic FSMs are indistinguishable [50]. Bisimulation is the strongest equivalence relation
+							discussed [50]. (Bi)simulation checking is also used for real-time systems [55].
+						</li>
+						<li><strong>Type Refinement</strong>: This considers only the existence and data types of input and output ports [26, 50].</li>
+						<li><strong>Language Refinement</strong>: This considers the sequences of valuations of inputs and outputs [50], which is equivalent to trace refinement [26, 49].</li>
+					</ul>
+				</section>
+
+				<section id="synthesis">
+					<h2>Controller Synthesis</h2>
+					<!-- Expand with methods & guarantees -->
+				</section>
+
+				<section id="casestudies">
+					<h2>Case Studies</h2>
+					<!-- Concrete examples -->
+				</section>
+
+				<section id="references">
+					<h2>References & Further Reading</h2>
+					<!-- Bibliography -->
+				</section>
+			</div>
+
+			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+		</body>
+	</html>
+</html>
