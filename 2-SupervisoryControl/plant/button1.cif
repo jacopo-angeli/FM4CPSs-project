@@ -1,0 +1,15 @@
+import "events.cif";
+plant Button1:
+
+    location Idle:
+        initial;
+        marked;
+        edge call1 goto Called;
+
+    location Called:
+        edge call1;
+        edge reset1 goto Idle;
+
+end
+svgfile "plant.svg";
+svgout id "call1-led" attr "fill" value if Button1.Idle: "red" else "green" end;

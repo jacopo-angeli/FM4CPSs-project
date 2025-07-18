@@ -1,0 +1,112 @@
+import "../plant/events.cif";
+
+requirement R2F0:
+
+    location AtF0:
+        initial;
+        marked;
+        edge up0 goto notAtF0;
+        edge call0 goto OpeningF0;
+        edge call1, call2, open, close, reset1, reset2;
+
+    location notAtF0:
+        marked;
+        edge down1 goto AtF0;
+        edge call0 goto CalledF0;
+        edge call1, call2, up1, down2, open, close, reset1, reset2;
+
+    location CalledF0:
+        marked;
+        edge down1 goto OpeningF0;
+        edge call0, call1, call2, open, close, up1, down2, reset1, reset2;
+
+    location OpeningF0:
+        marked;
+        edge open goto ClosingF0;
+        edge call0, call1, call2;
+
+    location ClosingF0:
+        marked;
+        edge close goto ResettingF0;
+        edge call0, call1, call2;
+
+    location ResettingF0:
+        marked;
+        edge call0, call1, call2;
+        edge reset0 goto AtF0;
+
+end
+
+requirement R2F1:
+
+    location AtF1:
+        marked;
+        edge down1, up1 goto notAtF1;
+        edge call1 goto OpeningF1;
+        edge call0, call2, open, close, reset1, reset2;
+
+    location notAtF1:
+        initial;
+        marked;
+        edge down2, up0 goto AtF1;
+        edge call1 goto CalledF1;
+        edge call0, call2, open, close, reset1, reset2;
+
+    location CalledF1:
+        marked;
+        edge down2, up0 goto OpeningF1;
+        edge call0, call1, call2, open, close, up1, down1, reset1, reset2;
+
+    location OpeningF1:
+        marked;
+        edge open goto ClosingF1;
+        edge call0, call1, call2;
+
+    location ClosingF1:
+        marked;
+        edge close goto ResettingF1;
+        edge call0, call1, call2;
+
+    location ResettingF1:
+        marked;
+        edge call0, call1, call2;
+        edge reset1 goto AtF1;
+
+end
+
+requirement R2F2:
+
+    location AtF2:
+        marked;
+        edge down2 goto notAtF2;
+        edge call2 goto OpeningF2;
+        edge call0, call1, open, close, reset1, reset2;
+
+    location notAtF2:
+        initial;
+        marked;
+        edge up1 goto AtF2;
+        edge call2 goto CalledF2;
+        edge call0, call1, up0, down1, open, close, reset1, reset2;
+
+    location CalledF2:
+        marked;
+        edge up1 goto OpeningF2;
+        edge call0, call1, call2, open, close, up0, down1, reset1, reset2;
+
+    location OpeningF2:
+        marked;
+        edge open goto ClosingF2;
+        edge call0, call1, call2;
+
+    location ClosingF2:
+        marked;
+        edge close goto ResettingF2;
+        edge call0, call1, call2;
+
+    location ResettingF2:
+        marked;
+        edge call0, call1, call2;
+        edge reset2 goto AtF2;
+
+end

@@ -1,0 +1,720 @@
+uncontrollable call0;
+controllable reset0;
+uncontrollable call1;
+controllable reset1;
+uncontrollable call2;
+controllable reset2;
+controllable up0;
+controllable up1;
+controllable down1;
+controllable down2;
+controllable open;
+controllable close;
+supervisor automaton $supervisor:
+  alphabet call0, reset0, call1, reset1, call2, reset2, up0, up1, down1, down2, open, close;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "notAtF1", R2F2: "notAtF2")
+  location s1:
+    initial;
+    marked;
+    edge up0 goto s2;
+    edge call2 goto s3;
+    edge call1 goto s4;
+    edge call0 goto s5;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "AtF1", R2F2: "notAtF2")
+  location s2:
+    marked;
+    edge down1 goto s1;
+    edge up1 goto s14;
+    edge call2 goto s12;
+    edge call1 goto s9;
+    edge call0 goto s15;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "notAtF1", R2F2: "CalledF2")
+  location s3:
+    edge up0 goto s12;
+    edge reset2 goto s13;
+    edge call2;
+    edge call1 goto s10;
+    edge call0 goto s7;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "CalledF1", R2F2: "notAtF2")
+  location s4:
+    edge up0 goto s9;
+    edge call2 goto s10;
+    edge reset1 goto s11;
+    edge call1;
+    edge call0 goto s8;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "notAtF1", R2F2: "notAtF2")
+  location s5:
+    edge open goto s6;
+    edge call2 goto s7;
+    edge call1 goto s8;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "notAtF1", R2F2: "notAtF2")
+  location s6:
+    edge close goto s19;
+    edge call2 goto s18;
+    edge call1 goto s16;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "notAtF1", R2F2: "CalledF2")
+  location s7:
+    edge open goto s18;
+    edge call2;
+    edge call1 goto s17;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "CalledF1", R2F2: "notAtF2")
+  location s8:
+    edge open goto s16;
+    edge call2 goto s17;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "OpeningF1", R2F2: "notAtF2")
+  location s9:
+    edge open goto s25;
+    edge call2 goto s23;
+    edge call1;
+    edge call0 goto s26;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s10:
+    edge up0 goto s23;
+    edge reset2 goto s24;
+    edge call2;
+    edge reset1 goto s21;
+    edge call1;
+    edge call0 goto s17;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "CalledF1", R2F2: "notAtF2")
+  location s11:
+    marked;
+    edge up0 goto s20;
+    edge call2 goto s21;
+    edge call1 goto s4;
+    edge call0 goto s22;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "AtF1", R2F2: "CalledF2")
+  location s12:
+    edge down1 goto s3;
+    edge up1 goto s29;
+    edge reset2 goto s27;
+    edge call2;
+    edge call1 goto s23;
+    edge call0 goto s30;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "notAtF1", R2F2: "CalledF2")
+  location s13:
+    marked;
+    edge up0 goto s27;
+    edge call2 goto s3;
+    edge call1 goto s24;
+    edge call0 goto s28;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "notAtF1", R2F2: "AtF2")
+  location s14:
+    marked;
+    edge down2 goto s2;
+    edge call2 goto s29;
+    edge call1 goto s32;
+    edge call0 goto s31;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "AtF1", R2F2: "notAtF2")
+  location s15:
+    edge down1 goto s5;
+    edge up1 goto s31;
+    edge call2 goto s30;
+    edge call1 goto s26;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "CalledF1", R2F2: "notAtF2")
+  location s16:
+    edge close goto s34;
+    edge call2 goto s33;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s17:
+    edge open goto s33;
+    edge call2;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "notAtF1", R2F2: "CalledF2")
+  location s18:
+    edge close goto s35;
+    edge call2;
+    edge call1 goto s33;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "notAtF1", R2F2: "notAtF2")
+  location s19:
+    edge call2 goto s35;
+    edge call1 goto s34;
+    edge reset0 goto s1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "OpeningF1", R2F2: "notAtF2")
+  location s20:
+    marked;
+    edge open goto s40;
+    edge call2 goto s38;
+    edge call1 goto s9;
+    edge call0 goto s41;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s21:
+    edge up0 goto s38;
+    edge reset2 goto s39;
+    edge call2;
+    edge call1 goto s10;
+    edge call0 goto s37;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "CalledF1", R2F2: "notAtF2")
+  location s22:
+    edge open goto s36;
+    edge call2 goto s37;
+    edge call1 goto s8;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "OpeningF1", R2F2: "CalledF2")
+  location s23:
+    edge open goto s44;
+    edge call2;
+    edge call1;
+    edge call0 goto s45;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s24:
+    edge up0 goto s42;
+    edge call2 goto s10;
+    edge reset1 goto s39;
+    edge call1;
+    edge call0 goto s43;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "ClosingF1", R2F2: "notAtF2")
+  location s25:
+    edge close goto s47;
+    edge call2 goto s44;
+    edge call1;
+    edge call0 goto s46;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "OpeningF1", R2F2: "notAtF2")
+  location s26:
+    edge open goto s46;
+    edge call2 goto s45;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "AtF1", R2F2: "CalledF2")
+  location s27:
+    marked;
+    edge down1 goto s13;
+    edge up1 goto s49;
+    edge call2 goto s12;
+    edge call1 goto s42;
+    edge call0 goto s50;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "notAtF1", R2F2: "CalledF2")
+  location s28:
+    edge open goto s48;
+    edge call2 goto s7;
+    edge call1 goto s43;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "notAtF1", R2F2: "OpeningF2")
+  location s29:
+    edge open goto s52;
+    edge call2;
+    edge call1 goto s53;
+    edge call0 goto s51;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "AtF1", R2F2: "CalledF2")
+  location s30:
+    edge down1 goto s7;
+    edge up1 goto s51;
+    edge reset2 goto s50;
+    edge call2;
+    edge call1 goto s45;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "notAtF1", R2F2: "AtF2")
+  location s31:
+    edge down2 goto s15;
+    edge call2 goto s51;
+    edge call1 goto s54;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "AtF2")
+  location s32:
+    edge down2 goto s9;
+    edge call2 goto s53;
+    edge reset1 goto s55;
+    edge call1;
+    edge call0 goto s54;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s33:
+    edge close goto s56;
+    edge call2;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "CalledF1", R2F2: "notAtF2")
+  location s34:
+    edge call2 goto s56;
+    edge call1;
+    edge reset0 goto s4;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "notAtF1", R2F2: "CalledF2")
+  location s35:
+    edge call2;
+    edge call1 goto s56;
+    edge reset0 goto s3;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "CalledF1", R2F2: "notAtF2")
+  location s36:
+    edge close goto s58;
+    edge call2 goto s57;
+    edge call1 goto s16;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s37:
+    edge open goto s57;
+    edge call2;
+    edge call1 goto s17;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "OpeningF1", R2F2: "CalledF2")
+  location s38:
+    edge open goto s61;
+    edge call2;
+    edge call1 goto s23;
+    edge call0 goto s62;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "AtF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s39:
+    marked;
+    edge up0 goto s59;
+    edge call2 goto s21;
+    edge call1 goto s24;
+    edge call0 goto s60;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "ClosingF1", R2F2: "notAtF2")
+  location s40:
+    edge close goto s64;
+    edge call2 goto s61;
+    edge call1 goto s25;
+    edge call0 goto s63;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "OpeningF1", R2F2: "notAtF2")
+  location s41:
+    edge open goto s63;
+    edge call2 goto s62;
+    edge call1 goto s26;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "OpeningF1", R2F2: "CalledF2")
+  location s42:
+    edge open goto s66;
+    edge call2 goto s23;
+    edge call1;
+    edge call0 goto s67;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s43:
+    edge open goto s65;
+    edge call2 goto s17;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Called", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "ClosingF1", R2F2: "CalledF2")
+  location s44:
+    edge close goto s69;
+    edge call2;
+    edge call1;
+    edge call0 goto s68;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "OpeningF1", R2F2: "CalledF2")
+  location s45:
+    edge open goto s68;
+    edge call2;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "ClosingF1", R2F2: "notAtF2")
+  location s46:
+    edge close goto s70;
+    edge call2 goto s68;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "ResettingF1", R2F2: "notAtF2")
+  location s47:
+    edge call2 goto s69;
+    edge reset1 goto s2;
+    edge call1;
+    edge call0 goto s70;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "notAtF1", R2F2: "CalledF2")
+  location s48:
+    edge close goto s71;
+    edge call2 goto s18;
+    edge call1 goto s65;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "notAtF1", R2F2: "OpeningF2")
+  location s49:
+    marked;
+    edge open goto s73;
+    edge call2 goto s29;
+    edge call1 goto s74;
+    edge call0 goto s72;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "AtF1", R2F2: "CalledF2")
+  location s50:
+    edge down1 goto s28;
+    edge up1 goto s72;
+    edge call2 goto s30;
+    edge call1 goto s67;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "notAtF1", R2F2: "OpeningF2")
+  location s51:
+    edge open goto s75;
+    edge call2;
+    edge call1 goto s76;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "notAtF1", R2F2: "ClosingF2")
+  location s52:
+    edge close goto s78;
+    edge call2;
+    edge call1 goto s77;
+    edge call0 goto s75;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "OpeningF2")
+  location s53:
+    edge open goto s77;
+    edge call2;
+    edge call1;
+    edge call0 goto s76;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "AtF2")
+  location s54:
+    edge down2 goto s26;
+    edge call2 goto s76;
+    edge reset1 goto s79;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "AtF2")
+  location s55:
+    marked;
+    edge down2 goto s20;
+    edge call2 goto s80;
+    edge call1 goto s32;
+    edge call0 goto s79;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s56:
+    edge call2;
+    edge call1;
+    edge reset0 goto s10;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s57:
+    edge close goto s81;
+    edge call2;
+    edge call1 goto s33;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "CalledF1", R2F2: "notAtF2")
+  location s58:
+    edge call2 goto s81;
+    edge call1 goto s34;
+    edge reset0 goto s11;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "OpeningF1", R2F2: "CalledF2")
+  location s59:
+    marked;
+    edge open goto s83;
+    edge call2 goto s38;
+    edge call1 goto s42;
+    edge call0 goto s84;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "OpeningF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s60:
+    edge open goto s82;
+    edge call2 goto s37;
+    edge call1 goto s43;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "ClosingF1", R2F2: "CalledF2")
+  location s61:
+    edge close goto s86;
+    edge call2;
+    edge call1 goto s44;
+    edge call0 goto s85;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "OpeningF1", R2F2: "CalledF2")
+  location s62:
+    edge open goto s85;
+    edge call2;
+    edge call1 goto s45;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "ClosingF1", R2F2: "notAtF2")
+  location s63:
+    edge close goto s87;
+    edge call2 goto s85;
+    edge call1 goto s46;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "ResettingF1", R2F2: "notAtF2")
+  location s64:
+    marked;
+    edge call2 goto s86;
+    edge call1 goto s47;
+    edge call0 goto s87;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s65:
+    edge close goto s88;
+    edge call2 goto s33;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "ClosingF1", R2F2: "CalledF2")
+  location s66:
+    edge close goto s90;
+    edge call2 goto s44;
+    edge call1;
+    edge call0 goto s89;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "OpeningF1", R2F2: "CalledF2")
+  location s67:
+    edge open goto s89;
+    edge call2 goto s45;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "ClosingF1", R2F2: "CalledF2")
+  location s68:
+    edge close goto s91;
+    edge call2;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "ResettingF1", R2F2: "CalledF2")
+  location s69:
+    edge call2;
+    edge reset1 goto s12;
+    edge call1;
+    edge call0 goto s91;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "ResettingF1", R2F2: "notAtF2")
+  location s70:
+    edge call2 goto s91;
+    edge reset1 goto s15;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "notAtF1", R2F2: "CalledF2")
+  location s71:
+    edge call2 goto s35;
+    edge call1 goto s88;
+    edge reset0 goto s13;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "notAtF1", R2F2: "OpeningF2")
+  location s72:
+    edge open goto s92;
+    edge call2 goto s51;
+    edge call1 goto s93;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "notAtF1", R2F2: "ClosingF2")
+  location s73:
+    edge close goto s95;
+    edge call2 goto s52;
+    edge call1 goto s94;
+    edge call0 goto s92;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "OpeningF2")
+  location s74:
+    edge open goto s94;
+    edge call2 goto s53;
+    edge call1;
+    edge call0 goto s93;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "notAtF1", R2F2: "ClosingF2")
+  location s75:
+    edge close goto s97;
+    edge call2;
+    edge call1 goto s96;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "OpeningF2")
+  location s76:
+    edge open goto s96;
+    edge call2;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Called", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "ClosingF2")
+  location s77:
+    edge close goto s98;
+    edge call2;
+    edge call1;
+    edge call0 goto s96;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "notAtF1", R2F2: "ResettingF2")
+  location s78:
+    edge reset2 goto s14;
+    edge call2;
+    edge call1 goto s98;
+    edge call0 goto s97;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "AtF2")
+  location s79:
+    edge down2 goto s41;
+    edge call2 goto s99;
+    edge call1 goto s54;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "OpeningF2")
+  location s80:
+    edge open goto s100;
+    edge call2;
+    edge call1 goto s53;
+    edge call0 goto s99;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s81:
+    edge call2;
+    edge call1 goto s56;
+    edge reset0 goto s21;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Open", R1: "Open", R2F0: "ClosingF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s82:
+    edge close goto s101;
+    edge call2 goto s57;
+    edge call1 goto s65;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "ClosingF1", R2F2: "CalledF2")
+  location s83:
+    edge close goto s103;
+    edge call2 goto s61;
+    edge call1 goto s66;
+    edge call0 goto s102;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "OpeningF1", R2F2: "CalledF2")
+  location s84:
+    edge open goto s102;
+    edge call2 goto s62;
+    edge call1 goto s67;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "ClosingF1", R2F2: "CalledF2")
+  location s85:
+    edge close goto s104;
+    edge call2;
+    edge call1 goto s68;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "ResettingF1", R2F2: "CalledF2")
+  location s86:
+    edge call2;
+    edge call1 goto s69;
+    edge call0 goto s104;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "ResettingF1", R2F2: "notAtF2")
+  location s87:
+    edge call2 goto s104;
+    edge call1 goto s70;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s88:
+    edge call2 goto s56;
+    edge call1;
+    edge reset0 goto s24;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "ClosingF1", R2F2: "CalledF2")
+  location s89:
+    edge close goto s105;
+    edge call2 goto s68;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "ResettingF1", R2F2: "CalledF2")
+  location s90:
+    edge call2 goto s69;
+    edge reset1 goto s27;
+    edge call1;
+    edge call0 goto s105;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "ResettingF1", R2F2: "CalledF2")
+  location s91:
+    edge call2;
+    edge reset1 goto s30;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "notAtF1", R2F2: "ClosingF2")
+  location s92:
+    edge close goto s107;
+    edge call2 goto s75;
+    edge call1 goto s106;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "OpeningF2")
+  location s93:
+    edge open goto s106;
+    edge call2 goto s76;
+    edge call1;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "ClosingF2")
+  location s94:
+    edge close goto s108;
+    edge call2 goto s77;
+    edge call1;
+    edge call0 goto s106;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "notAtF1", R2F2: "ResettingF2")
+  location s95:
+    marked;
+    edge call2 goto s78;
+    edge call1 goto s108;
+    edge call0 goto s107;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "ClosingF2")
+  location s96:
+    edge close goto s109;
+    edge call2;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "notAtF1", R2F2: "ResettingF2")
+  location s97:
+    edge reset2 goto s31;
+    edge call2;
+    edge call1 goto s109;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "ResettingF2")
+  location s98:
+    edge reset2 goto s32;
+    edge call2;
+    edge call1;
+    edge call0 goto s109;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "OpeningF2")
+  location s99:
+    edge open goto s110;
+    edge call2;
+    edge call1 goto s76;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "ClosingF2")
+  location s100:
+    edge close goto s111;
+    edge call2;
+    edge call1 goto s77;
+    edge call0 goto s110;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F0", Door: "Closed", R1: "Closed", R2F0: "ResettingF0", R2F1: "CalledF1", R2F2: "CalledF2")
+  location s101:
+    edge call2 goto s81;
+    edge call1 goto s88;
+    edge reset0 goto s39;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "ClosingF1", R2F2: "CalledF2")
+  location s102:
+    edge close goto s112;
+    edge call2 goto s85;
+    edge call1 goto s89;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "ResettingF1", R2F2: "CalledF2")
+  location s103:
+    marked;
+    edge call2 goto s86;
+    edge call1 goto s90;
+    edge call0 goto s112;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "ResettingF1", R2F2: "CalledF2")
+  location s104:
+    edge call2;
+    edge call1 goto s91;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "ResettingF1", R2F2: "CalledF2")
+  location s105:
+    edge call2 goto s91;
+    edge reset1 goto s50;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "ClosingF2")
+  location s106:
+    edge close goto s113;
+    edge call2 goto s96;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "notAtF1", R2F2: "ResettingF2")
+  location s107:
+    edge call2 goto s97;
+    edge call1 goto s113;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Called", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "ResettingF2")
+  location s108:
+    edge call2 goto s98;
+    edge call1;
+    edge call0 goto s113;
+  @state(Button0: "Called", Button1: "Called", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "ResettingF2")
+  location s109:
+    edge reset2 goto s54;
+    edge call2;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Open", R1: "Open", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "ClosingF2")
+  location s110:
+    edge close goto s114;
+    edge call2;
+    edge call1 goto s96;
+    edge call0;
+  @state(Button0: "Idle", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "notAtF0", R2F1: "CalledF1", R2F2: "ResettingF2")
+  location s111:
+    edge reset2 goto s55;
+    edge call2;
+    edge call1 goto s98;
+    edge call0 goto s114;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Idle", Cabin: "F1", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "ResettingF1", R2F2: "CalledF2")
+  location s112:
+    edge call2 goto s104;
+    edge call1 goto s105;
+    edge call0;
+  @state(Button0: "Called", Button1: "Called", Button2: "Idle", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "ResettingF2")
+  location s113:
+    edge call2 goto s109;
+    edge call1;
+    edge call0;
+  @state(Button0: "Called", Button1: "Idle", Button2: "Called", Cabin: "F2", Door: "Closed", R1: "Closed", R2F0: "CalledF0", R2F1: "CalledF1", R2F2: "ResettingF2")
+  location s114:
+    edge reset2 goto s79;
+    edge call2;
+    edge call1 goto s109;
+    edge call0;
+end

@@ -1,0 +1,15 @@
+import "events.cif";
+plant Door:
+
+    location Closed:
+        initial;
+        marked;
+        edge open goto Open;
+
+   location Open:
+        edge close goto Closed;
+
+end
+svgfile "plant.svg";
+svgout id "door-r" attr "x" value if Door.Closed: "82.600" else "92.600" end;
+svgout id "door-l" attr "x" value if Door.Closed: "65.400" else "55.400" end;

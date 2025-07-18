@@ -29,7 +29,6 @@ specTypes = {
     "TRUE": parser.TRUEEXP,
     "FALSE": parser.FALSEEXP,
 }
-
 basicTypes = {
     parser.ATOM,
     parser.NUMBER,
@@ -120,63 +119,160 @@ def parse_react(spec):
     return (f_formula, g_formula)
 
 
+# ----------------------------------------------------------------------------------------------
+def loop_start_search(fsm_bdd, Recur, PreReach):
+    s = fsm_bdd.pick_one_state(Recur)
+    while True:
+        R = None
+        Frontiers = []
+        New = fsm_bdd.post(s) | PreReach
+        while fsm_bdd.count_states(New) > 0:
+            R = New if R is None else New | R
+            Frontiers.append(R)
+            New = fsm_bdd.post(New) & PreReach
+            New = New - R
+        R = R & Recur
+        if s.entailed(R):
+            return (s, Frontiers)
+        else:
+            s = fsm_bdd.pick_one_state(R)
+
+
+def loop_build(fsm_bdd, s, Frontiers):
+    k = 0
+    while not s.entailed(Frontiers[k]):
+        k += 1
+    path = [s]
+    curr = s
+    for i in range(k - 1, -1, -1):
+        Pred = fsm_bdd.pre(curr) & Frontiers[i]
+        curr = fsm_bdd.pick_one_state(Pred)
+        path = [curr] + path
+    path = path + [s]
+    return path
+
+
+def prefix_build(fsm_bdd, target):
+    init = fsm_bdd.init
+    images = None
+    pre_counterex = counterex = target
+    while fsm_bdd.count_states(pre_counterex & init) > 0:
+        counterex = pre_counterex
+        pre_counterex = fsm_bdd.pre(counterex)
+
+
 def check_react_spec(spec):
     """
-    Return whether the loaded SMV model satisfies or not the GR(1) formula `spec`,
-    i.e., whether all executions of the model satisfy `spec`.
+    Check if a reactivity specification is satisfied by the loaded SMV model.
 
     Returns:
-      - (True, None) if the formula is satisfied by the model;
-      - (False, execution) if the formula is violated, where `execution` is a looping
-        counterexample as a tuple of alternating state and input dicts;
-      - None if `spec` is not a reactive formula.
+    - None if spec is not a reactivity formula
+    - (True, None) if the formula is satisfied
+    - (False, counterexample) if the formula is not satisfied
     """
-    # 1. Quick syntactic check: is it a reactive (GF f -> GF g) formula?
-    if parse_react(spec) is None:
+    # Parse the reactive formula
+    parse_result = parse_react(spec)
+    if parse_result is None:
         return None
 
-    # 2. Perform LTL model checking with counterexample explanation
-    sat, cex_data = pynusmv.mc.check_explain_ltl_spec(spec)
+    f, g = parse_result
+    ng = pynusmv.prop.not_(g)
 
-    # 3. If satisfied, return immediately
-    if sat:
-        return (True, None)
+    fsm_bdd = pynusmv.glob.prop_database().master.bddFsm
+    f_bdd = spec_to_bdd(fsm_bdd, f)
+    ng_bdd = spec_to_bdd(fsm_bdd, ng)
 
-    # 4. Build execution and detect loop from returned cex_data format
-    # cex_data may be provided either as (states_list, inputs_list, loop_idx)
-    # or as a flat tuple of alternating state/input dicts ending with state.
-    if isinstance(cex_data, tuple) and len(cex_data) == 3 and all(not isinstance(x, dict) for x in cex_data):
-        # original format: separate lists and loop index
-        raw_states, raw_inputs, loop_pos = cex_data
-        def bdd_to_dict(bdd_assign):
-            return {var: bdd_assign[var] for var in bdd_assign}
-        states = [bdd_to_dict(s) for s in raw_states]
-        inputs = [bdd_to_dict(i) for i in raw_inputs]
-    else:
-        # flat alternating dicts: state, input, state, input, ..., state
-        flat = list(cex_data)
-        states = flat[0::2]
-        inputs = flat[1::2]
-        # detect loop: the last state repeats an earlier one
-        last = states[-1]
-        try:
-            loop_pos = states.index(last)
-        except ValueError:
-            loop_pos = len(states) - 1
-        # already plain dicts
+    # Reach-set ---------------------------------------------------------------------------
+    reach_bdd = fsm_bdd.init
+    new_bdd = fsm_bdd.post(reach_bdd)
+    while not new_bdd.equal(reach_bdd.intersection(new_bdd)):
+        reach_bdd = reach_bdd.union(new_bdd.diff(reach_bdd))
+        new_bdd = fsm_bdd.post(reach_bdd)
+    # -------------------------------------------------------------------------------------
 
-    # Assemble alternating execution: state, input, state, ... ending with state
-    execution = []
-    for idx, st in enumerate(states):
-        execution.append(st)
-        if idx < len(inputs):
-            execution.append(inputs[idx])
+    # Symbolic repeatability check of f & !g ----------------------------------------------
+    recur_bdd = reach_bdd.intersection(f_bdd).intersection(ng_bdd)
+    pre_reach_bdd = reach_bdd
+    while recur_bdd.intersected(pre_reach_bdd):
+        pre_reach_bdd = new_bdd = fsm_bdd.pre(recur_bdd).intersection(ng_bdd)
+        while fsm_bdd.count_states(new_bdd) > 0:
+            pre_reach_bdd = pre_reach_bdd.union(new_bdd)
+            if recur_bdd.entailed(pre_reach_bdd):
+                # Property is repeatable -> witness build
+                # Loop head search--------------------------------------------------------
+                recur_states_list = list(fsm_bdd.pick_all_states(recur_bdd))
+                loop_head = recur_states_list.pop(0)
+                while True:
+                    R = None
+                    Frontiers = []
+                    new_bdd = fsm_bdd.post(loop_head).intersection(pre_reach_bdd)
+                    while fsm_bdd.count_states(new_bdd) > 0:
+                        R = new_bdd if R is None else R.union(new_bdd)
+                        Frontiers.append(R)  ### TODO : report ###
+                        new_bdd = fsm_bdd.post(new_bdd).intersection(pre_reach_bdd)
+                        new_bdd = new_bdd.diff(R)
+                    R = R.intersection(recur_bdd)
+                    if loop_head.entailed(R):
+                        break
+                    else:
+                        loop_head = recur_states_list.pop(0)
+                # -----------------------------------------------------------------------
+                # Loop body build -------------------------------------------------------
+                k = 0
+                while not loop_head.entailed(Frontiers[k]):
+                    k += 1
+                loop = [loop_head]
+                trace = [loop_head.get_str_values()]
+                curr = loop_head
+                for i in range(k - 1, -1, -1):
+                    Pred = fsm_bdd.pre(curr).intersection(Frontiers[i])
+                    curr = fsm_bdd.pick_one_state(Pred)
+                    trace = [
+                        curr.get_str_values(),
+                        fsm_bdd.pick_one_inputs(
+                            fsm_bdd.get_inputs_between_states(curr, loop[0])
+                        ).get_str_values(),
+                    ] + trace
+                    loop = [curr] + loop
 
-    # Close the loop by repeating the state at loop_pos
-    if 0 <= loop_pos < len(states):
-        execution[-1] = states[loop_pos]
+                trace = [
+                    loop_head.get_str_values(),
+                    fsm_bdd.pick_one_inputs(
+                        fsm_bdd.get_inputs_between_states(loop_head, loop[0])
+                    ).get_str_values(),
+                ] + trace
+                loop = [loop_head] + loop
+                # -------------------------------------------------------------------------
+                # Loop prefix build -------------------------------------------------------
+                images = list()
+                counterex = pre_counterex = loop_head
+                images.append(counterex)
+                while not pre_counterex.intersected(fsm_bdd.init):
+                    counterex = pre_counterex
+                    pre_counterex = fsm_bdd.pre(counterex)
+                    images.insert(0, pre_counterex)
+                # -------------------------------------------------------------------------
+                # trace composition -------------------------------------------------------
+                trace_init = list()
+                start = fsm_bdd.init  # Start from initial states
+                for i in range(0, len(images) - 1):
+                    start = start.intersection(images[i])
+                    post = fsm_bdd.post(start).intersection(images[i + 1])
+                    trace_init.append(fsm_bdd.pick_one_state(start).get_str_values())
+                    trace_init.append(
+                        fsm_bdd.pick_one_inputs(
+                            fsm_bdd.get_inputs_between_states(start, post)
+                        ).get_str_values()
+                    )
+                    start = post
+                # -------------------------------------------------------------------------
+                return (False, tuple(trace_init + trace))
+            new_bdd = (fsm_bdd.pre(new_bdd).diff(pre_reach_bdd)).intersection(ng_bdd)
+        recur_bdd = recur_bdd.intersection(pre_reach_bdd)
+    return (True, None)
+    # -------------------------------------------------------------------------------------
 
-    return (False, tuple(execution))
+
 if len(sys.argv) != 2:
     print("Usage:", sys.argv[0], "filename.smv")
     sys.exit(1)
@@ -199,6 +295,7 @@ for prop in pynusmv.glob.prop_database():
         print("Property is respected")
     elif res[0] == False:
         print("Property is not respected")
-        print("Counterexample:", res[1])
-
+        print("Counterexample:")
+        for t in res[1]:
+            print(t)
 pynusmv.init.deinit_nusmv()

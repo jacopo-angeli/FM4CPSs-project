@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="296.99994mm"
+   viewBox="0 0 210 296.99994"
+   version="1.1"
+   id="svg20312"
+   inkscape:export-filename="plant.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   sodipodi:docname="plant.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview20314"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.81559079"
+     inkscape:cx="283.23027"
+     inkscape:cy="617.3439"
+     inkscape:window-width="1868"
+     inkscape:window-height="1050"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs20309" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       width="100%"
+       height="99.999992%"
+       fill="#ecf0f3"
+       id="bg"
+       x="0"
+       y="0"
+       style="stroke-width:0.999997"
+       inkscape:label="bg" />
+    <rect
+       style="opacity:1;mix-blend-mode:normal;fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:1.57205;stroke-dasharray:none;stroke-opacity:1"
+       id="elevator"
+       width="135"
+       height="210"
+       x="37.5"
+       y="43.5"
+       rx="7.2305717"
+       inkscape:label="elevator" />
+    <rect
+       style="mix-blend-mode:normal;fill:#969696;fill-opacity:1;stroke:none;stroke-width:0.552364;stroke-dasharray:none;stroke-opacity:1"
+       id="cabin"
+       width="70"
+       height="50"
+       x="47.5"
+       y="53.5"
+       rx="3.7491853"
+       inkscape:label="cabin" />
+    <rect
+       style="mix-blend-mode:normal;fill:#dcdcdc;fill-opacity:1;stroke:none;stroke-width:0.32208;stroke-dasharray:none;stroke-opacity:1"
+       id="inside"
+       width="34"
+       height="35"
+       x="65.400002"
+       y="63.5"
+       rx="1.8210329"
+       inkscape:label="inside" />
+    <rect
+       style="mix-blend-mode:normal;fill:#646464;fill-opacity:1;stroke:none;stroke-width:0.227745;stroke-dasharray:none;stroke-opacity:1"
+       id="door-l"
+       width="17"
+       height="35"
+       x="65.400002"
+       y="63.5"
+       rx="0.91051644"
+       inkscape:label="door-l" />
+    <rect
+       style="mix-blend-mode:normal;fill:#646464;fill-opacity:1;stroke:none;stroke-width:0.227745;stroke-dasharray:none;stroke-opacity:1"
+       id="door-r"
+       width="17"
+       height="35"
+       x="82.599998"
+       y="63.5"
+       rx="0.91051644"
+       inkscape:label="door-r" />
+    <circle
+       style="fill:#fd0000;fill-opacity:1;stroke:none;stroke-width:0.312473;stroke-opacity:1"
+       id="call0-led"
+       cx="150"
+       cy="218.5"
+       r="3"
+       inkscape:label="call0-led" />
+    <circle
+       style="fill:#fd0000;fill-opacity:1;stroke:none;stroke-width:0.312473;stroke-opacity:1"
+       id="call1-led"
+       cx="150"
+       cy="148.5"
+       r="3"
+       inkscape:label="call1-led" />
+    <circle
+       style="fill:#fd0000;fill-opacity:1;stroke:none;stroke-width:0.312473;stroke-opacity:1"
+       id="call2-led"
+       cx="150"
+       cy="78.5"
+       r="3"
+       inkscape:label="call2-led" />
+    <circle
+       style="opacity:0.77;mix-blend-mode:normal;fill:#464646;fill-opacity:1;stroke:none;stroke-width:0.312;stroke-dasharray:none;stroke-opacity:1"
+       id="call2"
+       cx="150"
+       cy="78.5"
+       r="10"
+       inkscape:label="call2" />
+    <circle
+       style="opacity:0.77;mix-blend-mode:normal;fill:#464646;fill-opacity:1;stroke:none;stroke-width:0.312;stroke-dasharray:none;stroke-opacity:1"
+       id="call1"
+       cx="150"
+       cy="148.5"
+       r="10"
+       inkscape:label="call1" />
+    <circle
+       style="opacity:0.77;mix-blend-mode:normal;fill:#464646;fill-opacity:1;stroke:none;stroke-width:0.312;stroke-dasharray:none;stroke-opacity:1"
+       id="call0"
+       cx="150"
+       cy="218.5"
+       r="10"
+       inkscape:label="call0" />
+  </g>
+</svg>

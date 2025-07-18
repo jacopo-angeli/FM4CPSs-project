@@ -1,0 +1,2 @@
+controllable up0, up1, down1, down2, open, close, reset0, reset1, reset2;
+uncontrollable call0, call1, call2;

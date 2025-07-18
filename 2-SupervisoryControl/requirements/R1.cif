@@ -1,0 +1,16 @@
+import "../plant/events.cif";
+requirement R1:
+
+    location Closed:
+        initial;
+        marked;
+        edge up0    goto Closed;
+        edge up1    goto Closed;
+        edge down1  goto Closed;
+        edge down2  goto Closed;
+        edge open   goto Open;
+
+    location Open:
+        marked;
+        edge close  goto Closed;
+end

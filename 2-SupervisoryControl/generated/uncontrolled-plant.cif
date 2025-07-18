@@ -1,0 +1,69 @@
+controllable up0;
+controllable up1;
+controllable down1;
+controllable down2;
+controllable open;
+controllable close;
+controllable reset0;
+controllable reset1;
+controllable reset2;
+uncontrollable call0;
+uncontrollable call1;
+uncontrollable call2;
+plant automaton Button0:
+  location Idle:
+    initial;
+    marked;
+    edge call0 goto Called;
+  location Called:
+    edge call0;
+    edge reset0 goto Idle;
+end
+plant automaton Button1:
+  location Idle:
+    initial;
+    marked;
+    edge call1 goto Called;
+  location Called:
+    edge call1;
+    edge reset1 goto Idle;
+end
+plant automaton Button2:
+  location Idle:
+    initial;
+    marked;
+    edge call2 goto Called;
+  location Called:
+    edge call2;
+    edge reset2 goto Idle;
+end
+plant automaton Cabin:
+  location F0:
+    initial;
+    marked;
+    edge up0 goto F1;
+  location F1:
+    marked;
+    edge up1 goto F2;
+    edge down1 goto F0;
+  location F2:
+    marked;
+    edge down2 goto F1;
+end
+plant automaton Door:
+  location Closed:
+    initial;
+    marked;
+    edge open goto Open;
+  location Open:
+    edge close goto Closed;
+end
+svgout id "call0-led" attr "fill" value if Button0.Idle: "red" else "green" end file "../plant/plant.svg";
+svgout id "call1-led" attr "fill" value if Button1.Idle: "red" else "green" end file "../plant/plant.svg";
+svgout id "call2-led" attr "fill" value if Button2.Idle: "red" else "green" end file "../plant/plant.svg";
+svgout id "door-r" attr "y" value if Cabin.F0: "203.500" elif Cabin.F1: "133.500" else "63.500" end file "../plant/plant.svg";
+svgout id "door-l" attr "y" value if Cabin.F0: "203.500" elif Cabin.F1: "133.500" else "63.500" end file "../plant/plant.svg";
+svgout id "inside" attr "y" value if Cabin.F0: "203.500" elif Cabin.F1: "133.500" else "63.500" end file "../plant/plant.svg";
+svgout id "cabin" attr "y" value if Cabin.F0: "193.500" elif Cabin.F1: "123.500" else "53.500" end file "../plant/plant.svg";
+svgout id "door-r" attr "x" value if Door.Closed: "82.600" else "92.600" end file "../plant/plant.svg";
+svgout id "door-l" attr "x" value if Door.Closed: "65.400" else "55.400" end file "../plant/plant.svg";

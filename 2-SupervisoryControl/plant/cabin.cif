@@ -1,0 +1,23 @@
+import "events.cif";
+plant Cabin:
+
+    location F0:
+        initial;
+        marked;
+        edge up0 goto F1;
+
+    location F1:
+        marked;
+        edge up1 goto F2;
+        edge down1 goto F0;
+
+    location F2:
+        marked;
+        edge down2 goto F1;
+
+end
+svgfile "plant.svg";
+svgout id "door-r" attr "y" value if Cabin.F0: "203.500" elif Cabin.F1: "133.500" else "63.500" end;
+svgout id "door-l" attr "y" value if Cabin.F0: "203.500" elif Cabin.F1: "133.500" else "63.500" end;
+svgout id "inside" attr "y" value if Cabin.F0: "203.500" elif Cabin.F1: "133.500" else "63.500" end;
+svgout id "cabin" attr "y" value if Cabin.F0: "193.500" elif Cabin.F1: "123.500" else "53.500" end;
