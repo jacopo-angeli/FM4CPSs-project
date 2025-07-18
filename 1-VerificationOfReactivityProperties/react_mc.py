@@ -120,47 +120,6 @@ def parse_react(spec):
 
 
 # ----------------------------------------------------------------------------------------------
-def loop_start_search(fsm_bdd, Recur, PreReach):
-    s = fsm_bdd.pick_one_state(Recur)
-    while True:
-        R = None
-        Frontiers = []
-        New = fsm_bdd.post(s) | PreReach
-        while fsm_bdd.count_states(New) > 0:
-            R = New if R is None else New | R
-            Frontiers.append(R)
-            New = fsm_bdd.post(New) & PreReach
-            New = New - R
-        R = R & Recur
-        if s.entailed(R):
-            return (s, Frontiers)
-        else:
-            s = fsm_bdd.pick_one_state(R)
-
-
-def loop_build(fsm_bdd, s, Frontiers):
-    k = 0
-    while not s.entailed(Frontiers[k]):
-        k += 1
-    path = [s]
-    curr = s
-    for i in range(k - 1, -1, -1):
-        Pred = fsm_bdd.pre(curr) & Frontiers[i]
-        curr = fsm_bdd.pick_one_state(Pred)
-        path = [curr] + path
-    path = path + [s]
-    return path
-
-
-def prefix_build(fsm_bdd, target):
-    init = fsm_bdd.init
-    images = None
-    pre_counterex = counterex = target
-    while fsm_bdd.count_states(pre_counterex & init) > 0:
-        counterex = pre_counterex
-        pre_counterex = fsm_bdd.pre(counterex)
-
-
 def check_react_spec(spec):
     """
     Check if a reactivity specification is satisfied by the loaded SMV model.
@@ -208,7 +167,7 @@ def check_react_spec(spec):
                     new_bdd = fsm_bdd.post(loop_head).intersection(pre_reach_bdd)
                     while fsm_bdd.count_states(new_bdd) > 0:
                         R = new_bdd if R is None else R.union(new_bdd)
-                        Frontiers.append(R)  ### TODO : report ###
+                        Frontiers.append(R)
                         new_bdd = fsm_bdd.post(new_bdd).intersection(pre_reach_bdd)
                         new_bdd = new_bdd.diff(R)
                     R = R.intersection(recur_bdd)
