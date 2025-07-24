@@ -1,7 +1,6 @@
 import pynusmv
 import sys
 from pynusmv_lower_interface.nusmv.parser import parser
-from collections import deque
 
 specTypes = {
     "LTLSPEC": parser.TOK_LTLSPEC,
@@ -151,8 +150,7 @@ def check_react_spec(spec):
 
     # Symbolic repeatability check of f & !g ----------------------------------------------
     recur_bdd = reach_bdd.intersection(f_bdd).intersection(ng_bdd)
-    pre_reach_bdd = reach_bdd
-    while recur_bdd.intersected(pre_reach_bdd):
+    while fsm_bdd.count_states(recur_bdd) > 0:
         pre_reach_bdd = new_bdd = fsm_bdd.pre(recur_bdd).intersection(ng_bdd)
         while fsm_bdd.count_states(new_bdd) > 0:
             pre_reach_bdd = pre_reach_bdd.union(new_bdd)
@@ -225,7 +223,7 @@ def check_react_spec(spec):
                     )
                     start = post
                 # -------------------------------------------------------------------------
-                return (False, tuple(trace_init + trace))
+                return (False, trace_init + trace)
             new_bdd = (fsm_bdd.pre(new_bdd).diff(pre_reach_bdd)).intersection(ng_bdd)
         recur_bdd = recur_bdd.intersection(pre_reach_bdd)
     return (True, None)
