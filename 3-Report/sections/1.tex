@@ -2,90 +2,133 @@
 \subsection{Problem overview}
 The goal is to develop an algorithm that can verify a specific class of LTL
 properties called reactivity properties. These are formulas of the form
-\[\always\eventually f \implies \always\eventually g\] where \(f\) and \(g\) are Boolean formulas without temporal operators.\\[2ex]
-By applying logical transformations, the negation of \(\always\eventually f
-\implies \always\eventually g\) becomes \(\always\eventually f \and
-\lnot\always\eventually g\). The second part, \(\lnot\always\eventually g\), is
-equivalent to \(\eventually\always \lnot g\), so the overall formula becomes
-\(\always\eventually f \and \eventually\always \lnot g\). This means we are
-looking for executions where \(f\) keeps happening infinitely often, but after
-some point, \(g\) stops happening altogether.\\[2ex]
-To verify this, the algorithm tries to find a cycle (i.e., a looping execution
-trace) in the state space where \(f\) is satisfied and \(g\) is not. If such a
-cycle exists, it means there is an infinite execution where \(f\) keeps being
-true, and \(g\) never becomes true again, i.e.\ exactly what violates the original
-property. Since the model checker works with finite representations of infinite
-executions using loops, finding such a cycle is sufficient to prove the
-property is not valid.\\[2ex]
-The solution follows the algorithm with witness output discussed during the
-course. If the formula \(\always\eventually f \and \lnot g\)
-is satisfiable, the witness is built step by step: the algorithm looks for a
-loop head, then constructs the loop body, builds the prefix that leads to it,
-and finally puts everything together into a looping trace. This trace acts as a
-concrete counterexample to the original property.
+\[\always\eventually f \implies \always\eventually g\] where \(f\) and \(g\)
+are Boolean formulas without temporal operators.\\[2ex]
+The formula asserts that if the condition \(f\) keeps becoming true infinitely
+often, then the condition \(g\) must also occur infinitely often. The solution
+presented checks whether its negation holds rather than directly proving the
+implication.\\[2ex]
+The negation of the formula \(\always\eventually f \implies \always\eventually
+g\) is \(\always\eventually f \implies \always\eventually \neg g\). Intuitively
+the orignal formula is violated if there is an execution in which \(f\) continues
+to occur infinitely often while \(g\) permanently stops occurring. \\[2ex]
+The core function delivered searches for a cycle in the state space where
+\(f\) is satisfied and \(g\) is not. Finding such a cycle is sufficient to prove
+the property is not valid, and was partially covered during lectures. In short,
+if the formula \(\always\eventually f \AND \lnot g\) is satisfiable, the witness
+is build identifing the loop head, then constructing the loop body, builds the
+prefix that leads to it from the initial states, and finally combines
+everything into a concrete trace. This trace acts as a counterexample to the
+original property.
 
-\subsection{Reachable states}
-\begin{figure}[h]\label{fig:one}
-    \centering
-    \includegraphics[width=6cm]{../media/symbolic-bfs-algorithm.png}
-    \caption{Symbolic BFS algorithm to compute the reachable set.}
-\end{figure}
-\noindent The usage of \texttt{reachable\_states} from the \texttt{pynusmv} library
-wasn't allowed for this project, the solution implemented the symbolic BFS
-algorithm presented in Part 7 of the course and shown in \hyperref[fig:one]{Figure 1}. The algorithm
-explores the state space starting from the initial region and incrementally
-expands the set of reachable states by computing successors and discarding
-already visited states.\\[2ex]
-The solution follows the same structure, using BDD operations provided by
-\texttt{pynusmv} and is the following:
-\begin{verbatim}
+\subsection{Symbolic reactivity check}
+
+\subsubsection{Sanity check and model preparation}
+\begin{small}
+    \begin{verbatim}
+        
+    parse_result = parse_react(spec)
+    if parse_result is None:
+        return None
+
+    f, g = parse_result
+    ng = pynusmv.prop.not_(g)
+
+    fsm_bdd = pynusmv.glob.prop_database().master.bddFsm
+    f_bdd = spec_to_bdd(fsm_bdd, f)
+    ng_bdd = spec_to_bdd(fsm_bdd, ng)
+    \end{verbatim}
+\end{small}
+The implementation begins by parsing the input specification to ensure it
+matches the required reactivity property form. If the formula does not
+conform, the function exits early. Otherwise, the Boolean formulas
+\(f\) and \(g\) are extracted, and the negation of \(g\) is constructed.
+The finite state machine is then prepared in BDD form, and both \(f\) and
+\(\neg g\) are converted into their corresponding BDD representations.
+This setup enables efficient symbolic manipulation in the subsequent
+verification steps.
+
+\subsubsection{Reachable states}
+\begin{small}
+    \begin{verbatim}
+        
     reach_bdd = fsm_bdd.init
     new_bdd = fsm_bdd.post(reach_bdd)
     while not new_bdd.equal(reach_bdd.intersection(new_bdd)):
-        reach_bdd = reach_bdd.union(new_bdd.diff(reach_bdd))
-        new_bdd = fsm_bdd.post(reach_bdd)
-\end{verbatim}
+    reach_bdd = reach_bdd.union(new_bdd.diff(reach_bdd))
+    new_bdd = fsm_bdd.post(reach_bdd)
+    \end{verbatim}
+\end{small}
+The usage of \texttt{reachable\_states} from the \texttt{pynusmv} library
+wasn't allowed for this project, hence the in the solution is implemented
+the symbolic BFS algorithm presented in Part 7 of the course. The algorithm
+explores the state space starting from the initial region and incrementally
+expands the set of reachable states by computing successors and discarding
+already visited states:
+\begin{figure}[H]\label{fig:reachability-algorithm}
+    \centering
+    \includegraphics[width=5cm]{../media/symbolic-bfs-algorithm.png}
+    \caption{Symbolic BFS algorithm presented in class.}
+\end{figure}
 
-\subsection{Implementation details}
-\begin{figure}[h]\label{fig:two}
+\subsubsection{Symbolic repeatability check}
+\begin{small}
+    \begin{verbatim}
+
+    recur_bdd = reach_bdd.intersection(f_bdd).intersection(ng_bdd)
+    pre_reach_bdd = reach_bdd
+    while recur_bdd.intersected(pre_reach_bdd):
+        pre_reach_bdd = new_bdd = fsm_bdd.pre(recur_bdd).intersection(ng_bdd)
+        while fsm_bdd.count_states(new_bdd) > 0:
+            pre_reach_bdd = pre_reach_bdd.union(new_bdd)
+            if recur_bdd.entailed(pre_reach_bdd):
+                # Here property is repeatable
+                # witness construction
+                return (False, witness)
+            new_bdd = (fsm_bdd.pre(new_bdd).diff(pre_reach_bdd)).intersection(ng_bdd)
+        recur_bdd = recur_bdd.intersection(pre_reach_bdd)
+    # Here property is not repeatable
+    return (True, None)
+
+\end{verbatim}
+\end{small}
+The repeatability check is implemented as described in the course
+(see \hyperref[fig:repeatability-algorithm]{Figure 2}), with some
+structural differences:
+\begin{itemize}
+    \item \texttt{recur\_bdd} is defined as the intersection of the
+          reachable states, \texttt{f\_bdd}, and \texttt{ng\_bdd},
+          following the outlined strategy.
+    \item \texttt{pre\_reach\_bdd} is reset to \texttt{new\_bdd} instead
+          of the empty set to simplify the implementation.
+\end{itemize}
+If \(f \land \neg g\) is not repeatable, the loop exits and the function
+returns \texttt{(True, None)} as requested by the assignment; otherwise,
+the entire witness search process starts. Below is the pseudo-code of
+the symbolic repeatability check.
+\begin{figure}[H]\label{fig:repeatability-algorithm}
     \centering
     \includegraphics[width=10cm]{../media/symbolic-repeatability-algorithm.png}
     \caption{Symbolic repeatability algorithm presented in class.}
 \end{figure}
-The implementation of the verification procedure is structured around a single
-main function that performs both parsing and symbolic checking of the
-reactivity property. The function starts by parsing the input specification to
-ensure it has the correct reactivity form \(\always\eventually f \implies
-\always\eventually g\). If the formula doesn't match this structure, the
-function returns \texttt{None}.
 
-Once the specification is parsed, the body of the algorithm builds BDDs for
-both \(f\) and \(\neg g\). These are the core formulas for the negated property
-\(\always\eventually f \and \eventually\always \neg g\), which we aim to
-verify.
+\subsubsection{Witness construction}
 
-The first computational phase is the symbolic reachability check, implemented
-manually using the algorithm from the course, since the use of
-\texttt{reachable\_states} from \texttt{pynusmv} was not allowed. This step
-computes all states reachable from the initial condition by iteratively
-applying the transition relation and accumulating new states until a fixpoint
-is reached.
+\paragraph{Loop head identification}
+\paragraph{Loop body construction}
+\paragraph{Prefix leading to the loop head}
+\paragraph{Trace construction}
 
-After that, the symbolic repeatability check begins. This phase looks for a
-region of the reachable state space where both \(f\) and \(\neg g\) hold, and
-attempts to grow this region backwards using pre-image computation. If this
-fixpoint expansion includes the entire recurrent region, the property is
-considered repeatable, and a counterexample must be built.
-
-If repeatability is confirmed, the algorithm proceeds through three structured
-phases of trace construction: (i) a loop is extracted by locating a cycle
-within the recurrent region, (ii) the loop body is traced backward from the
-loop head, and (iii) a prefix from the initial states to the loop is built. The
-final trace is constructed by combining the prefix and the loop into a single
-execution trace, alternating states and inputs.
-
-If no such repeatable region exists, the formula is considered satisfied and
-the function returns \texttt{(True, None)}. Otherwise, the constructed trace is
-returned as a witness for the violation of the property.
-
-\subsection{Correctness Justification}
+The witness construction is performed as described in the course, with the
+following steps:
+\begin{itemize}
+    \item The loop head is identified as the first state in \texttt{recur\_bdd}.
+    \item The loop body is constructed by iteratively applying the pre operator
+          to the loop head until no new states are found.
+    \item The prefix leading to the loop head is built by applying the post operator
+          to the initial states until the loop head is reached.
+    \item Finally, the trace is constructed by combining the prefix and the loop body.
+    \item The trace is returned as a counterexample to the original property.
+    \item If the property is repeatable, the function returns \texttt{False} and the
+          witness trace; otherwise, it returns \texttt{True} and \texttt{None}.
+\end{itemize}
