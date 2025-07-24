@@ -17,7 +17,7 @@ The core function delivered searches for a cycle in the state space where
 the property is not valid, and was partially covered during lectures. In short,
 if the formula \(\always\eventually f \AND \lnot g\) is satisfiable, the witness
 is build identifing the loop head, then constructing the loop body, builds the
-prefix that leads to it from the initial states, and finally combines
+prefix that leads to it from the initial states, and finally combining
 everything into a concrete trace. This trace acts as a counterexample to the
 original property.
 
@@ -76,8 +76,7 @@ already visited states:
     \begin{verbatim}
 
     recur_bdd = reach_bdd.intersection(f_bdd).intersection(ng_bdd)
-    pre_reach_bdd = reach_bdd
-    while recur_bdd.intersected(pre_reach_bdd):
+    while fsm_bdd.count_states(recur_bdd) > 0:
         pre_reach_bdd = new_bdd = fsm_bdd.pre(recur_bdd).intersection(ng_bdd)
         while fsm_bdd.count_states(new_bdd) > 0:
             pre_reach_bdd = pre_reach_bdd.union(new_bdd)
@@ -100,12 +99,12 @@ structural differences:
           reachable states, \texttt{f\_bdd}, and \texttt{ng\_bdd},
           following the outlined strategy.
     \item \texttt{pre\_reach\_bdd} is reset to \texttt{new\_bdd} instead
-          of the empty set to simplify the implementation.
+          of the empty set to simplify the implementation. This doesn't affect
+          the correctness of the algorithm since, for each states of \texttt{recur\_bdd}
+          the first initialization of \texttt{pre\_reach\_bdd} is the only difference 
+          from the original, and \(\emptyset \ \cup\) \texttt{new\_bdd} is equivalent to 
+          \texttt{new\_bdd} \(\cup\) \texttt{new\_bdd}.
 \end{itemize}
-If \(f \land \neg g\) is not repeatable, the loop exits and the function
-returns \texttt{(True, None)} as requested by the assignment; otherwise,
-the entire witness search process starts. Below is the pseudo-code of
-the symbolic repeatability check.
 \begin{figure}[H]\label{fig:repeatability-algorithm}
     \centering
     \includegraphics[width=10cm]{../media/symbolic-repeatability-algorithm.png}
@@ -113,11 +112,114 @@ the symbolic repeatability check.
 \end{figure}
 
 \subsubsection{Witness construction}
-
+As anticipated above the witness is contructed when \(\always \eventually f 
+\AND \neg g \) is repeatable, that is when the entire recurrent region can 
+be regenerated through repeated application of the pre-image operator under 
+the constraint \(\neg g\), that is a complex way of saying when
+\begin{enumerate}
+    \item Beginning from the set of reachable states that satisfy 
+        \( f \land \neg g \) (\texttt{recur\_bdd}),
+    \item Iteratively find states that can reach \texttt{recur\_bdd} without leaving 
+        \( \neg g \) \\(\texttt{pre\_reach\_bdd}),
+    \item In one iteration all \texttt{recur\_bdd} is included in 
+        \texttt{pre\_reach\_bdd} so it's possible to go backward 
+        from every recurrent state to some other state also within the 
+        same set without leaving \( \neg g \).
+\end{enumerate}
+The solution implements the witness construction algorithm
+as described in the course, with some minor modifications to adapt it to the
+symbolic framework and an additional phase not treated of trace composition.
+\newpage
 \paragraph{Loop head identification}
+\begin{small}
+\begin{verbatim}
+    recur_states_list = list(fsm_bdd.pick_all_states(recur_bdd))
+    loop_head = recur_states_list.pop(0)
+    while True:
+        R = None
+        Frontiers = []
+        new_bdd = fsm_bdd.post(loop_head).intersection(pre_reach_bdd)
+        while fsm_bdd.count_states(new_bdd) > 0:
+            R = new_bdd if R is None else R.union(new_bdd)
+            Frontiers.append(R)
+            new_bdd = fsm_bdd.post(new_bdd).intersection(pre_reach_bdd)
+            new_bdd = new_bdd.diff(R)
+        R = R.intersection(recur_bdd)
+        if loop_head.entailed(R):
+            break
+        else:
+            loop_head = recur_states_list.pop(0)
+
+\end{verbatim}
+\end{small}
+
 \paragraph{Loop body construction}
-\paragraph{Prefix leading to the loop head}
+\begin{small}
+\begin{verbatim}
+
+    k = 0
+    while not loop_head.entailed(Frontiers[k]):
+        k += 1
+    loop = [loop_head]
+    trace = [loop_head.get_str_values()]
+    curr = loop_head
+    for i in range(k - 1, -1, -1):
+        Pred = fsm_bdd.pre(curr).intersection(Frontiers[i])
+        curr = fsm_bdd.pick_one_state(Pred)
+        trace = [
+            curr.get_str_values(),
+            fsm_bdd.pick_one_inputs(
+                fsm_bdd.get_inputs_between_states(curr, loop[0])
+            ).get_str_values(),
+        ] + trace
+        loop = [curr] + loop
+
+    trace = [
+        loop_head.get_str_values(),
+        fsm_bdd.pick_one_inputs(
+            fsm_bdd.get_inputs_between_states(loop_head, loop[0])
+        ).get_str_values(),
+    ] + trace
+    loop = [loop_head] + loop
+
+\end{verbatim}
+\end{small}
+
+\paragraph{Connecting loop and initial states}
+\begin{small}
+\begin{verbatim}
+
+    images = list()
+    counterex = pre_counterex = loop_head
+    images.append(counterex)
+    while not pre_counterex.intersected(fsm_bdd.init):
+        counterex = pre_counterex
+        pre_counterex = fsm_bdd.pre(counterex)
+        images.insert(0, pre_counterex)
+
+\end{verbatim}
+\end{small}
+
 \paragraph{Trace construction}
+\begin{small}
+\begin{verbatim}
+
+    trace_init = list()
+    start = fsm_bdd.init  # Start from initial states
+    for i in range(0, len(images) - 1):
+        start = start.intersection(images[i])
+        post = fsm_bdd.post(start).intersection(images[i + 1])
+        trace_init.append(fsm_bdd.pick_one_state(start).get_str_values())
+        trace_init.append(
+            fsm_bdd.pick_one_inputs(
+                fsm_bdd.get_inputs_between_states(start, post)
+            ).get_str_values()
+        )
+        start = post
+    witness = trace_init + trace
+
+\end{verbatim}
+\end{small}
 
 The witness construction is performed as described in the course, with the
 following steps:
