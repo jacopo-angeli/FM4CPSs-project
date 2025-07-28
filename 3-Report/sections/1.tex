@@ -9,11 +9,13 @@ often, then the condition \(g\) must also occur infinitely often. The solution
 presented checks whether its negation holds rather than directly proving the
 implication.\\[2ex]
 The negation of the formula \(\always\eventually f \implies \always\eventually
-g\) is \(\always\eventually f \implies \always\eventually \neg g\). Intuitively
+g\) is \(\always\eventually f \AND \always\eventually \neg g\). Intuitively
 the orignal formula is violated if there is an execution in which \(f\) continues
-to occur infinitely often while \(g\) permanently stops occurring. \\[2ex]
-The core function delivered searches for a cycle in the state space where
-\(f\) is satisfied and \(g\) is not. Finding such a cycle is sufficient to prove
+to occur infinitely often while \(g\) permanently stops occurring. Instead of 
+proving the implication directly, the algorithm searches for a counterexample 
+to the implication by checking the negation, \\[2ex]
+The solution searches for a cycle in the state space where \(f\) is satisfied 
+and \(g\) is not. Finding such cycle is sufficient to prove
 the property is not valid, and was partially covered during lectures. In short,
 if the formula \(\always\eventually f \AND \lnot g\) is satisfiable, the witness
 is build identifing the loop head, then constructing the loop body, builds the
@@ -23,9 +25,9 @@ original property.
 
 \subsection{Symbolic reactivity check}
 
-\subsubsection{Sanity check and model preparation}
-\begin{small}
-    \begin{verbatim}
+\paragraph{Sanity check and model preparation}
+\begin{scriptsize}
+\begin{verbatim}
         
     parse_result = parse_react(spec)
     if parse_result is None:
@@ -38,7 +40,7 @@ original property.
     f_bdd = spec_to_bdd(fsm_bdd, f)
     ng_bdd = spec_to_bdd(fsm_bdd, ng)
     \end{verbatim}
-\end{small}
+\end{scriptsize}
 The implementation begins by parsing the input specification to ensure it
 matches the required reactivity property form. If the formula does not
 conform, the function exits early. Otherwise, the Boolean formulas
@@ -48,19 +50,19 @@ The finite state machine is then prepared in BDD form, and both \(f\) and
 This setup enables efficient symbolic manipulation in the subsequent
 verification steps.
 
-\subsubsection{Reachable states}
-\begin{small}
-    \begin{verbatim}
+\paragraph{Reachable states}
+\begin{scriptsize}
+\begin{verbatim}
         
     reach_bdd = fsm_bdd.init
     new_bdd = fsm_bdd.post(reach_bdd)
     while not new_bdd.equal(reach_bdd.intersection(new_bdd)):
     reach_bdd = reach_bdd.union(new_bdd.diff(reach_bdd))
     new_bdd = fsm_bdd.post(reach_bdd)
-    \end{verbatim}
-\end{small}
+\end{verbatim}
+\end{scriptsize}
 The usage of \texttt{reachable\_states} from the \texttt{pynusmv} library
-wasn't allowed for this project, hence the in the solution is implemented
+wasn't allowed for this project, hence the in the solution implements
 the symbolic BFS algorithm presented in Part 7 of the course. The algorithm
 explores the state space starting from the initial region and incrementally
 expands the set of reachable states by computing successors and discarding
@@ -71,9 +73,9 @@ already visited states:
     \caption{Symbolic BFS algorithm presented in class.}
 \end{figure}
 
-\subsubsection{Symbolic repeatability check}
-\begin{small}
-    \begin{verbatim}
+\paragraph{Symbolic repeatability check}
+\begin{scriptsize}
+\begin{verbatim}
 
     recur_bdd = reach_bdd.intersection(f_bdd).intersection(ng_bdd)
     while fsm_bdd.count_states(recur_bdd) > 0:
@@ -90,17 +92,21 @@ already visited states:
     return (True, None)
 
 \end{verbatim}
-\end{small}
-The repeatability check is implemented as described in the course
-(see \hyperref[fig:repeatability-algorithm]{Figure 2}), with some
-structural differences:
+\end{scriptsize}
+The repeatability check is implemented as described during part 7 of the 
+course. The repeatability check essentially computes a fixed point over the reachable 
+state space considering only the transitions that satisfy the formula.\\[2ex]
+This fixed point is computed by repeatedly applying the pre-image operator. Each iteration 
+identifies the set of states that can reach the previous set in a single step, i.e., 
+their pre-image. If the sequence stabilizes, it indicates a set of states that can 
+reach each other infinitely often, thereby confirming the presence of a potential cycle.
 \begin{itemize}
     \item \texttt{recur\_bdd} is defined as the intersection of the
           reachable states, \texttt{f\_bdd}, and \texttt{ng\_bdd},
           following the outlined strategy.
     \item \texttt{pre\_reach\_bdd} is reset to \texttt{new\_bdd} instead
           of the empty set to simplify the implementation. This doesn't affect
-          the correctness of the algorithm since, for each states of \texttt{recur\_bdd}
+          the correctness of the algorithm since, for each state of \texttt{recur\_bdd}
           the first initialization of \texttt{pre\_reach\_bdd} is the only difference 
           from the original, and \(\emptyset \ \cup\) \texttt{new\_bdd} is equivalent to 
           \texttt{new\_bdd} \(\cup\) \texttt{new\_bdd}.
@@ -111,36 +117,41 @@ structural differences:
     \caption{Symbolic repeatability algorithm presented in class.}
 \end{figure}
 
-\subsubsection{Witness construction}
+\paragraph{Witness construction}\hfill\\
 As anticipated above the witness is contructed when \(\always \eventually f 
-\AND \neg g \) is repeatable, that is when the entire recurrent region can 
-be regenerated through repeated application of the pre-image operator under 
-the constraint \(\neg g\), that is a complex way of saying when
-\begin{enumerate}
-    \item Beginning from the set of reachable states that satisfy 
-        \( f \land \neg g \) (\texttt{recur\_bdd}),
-    \item Iteratively find states that can reach \texttt{recur\_bdd} without leaving 
-        \( \neg g \) \\(\texttt{pre\_reach\_bdd}),
-    \item In one iteration all \texttt{recur\_bdd} is included in 
-        \texttt{pre\_reach\_bdd} so it's possible to go backward 
-        from every recurrent state to some other state also within the 
-        same set without leaving \( \neg g \).
-\end{enumerate}
+\AND \neg g \) is repeatable, that is when beginning from the set of reachable states 
+that satisfy \( f \land \neg g \) (\texttt{recur\_bdd}) and iteratively find states that 
+can reach \texttt{recur\_bdd} without leaving \( \neg g \) \\(\texttt{pre\_reach\_bdd}),
+in the current iteration all \texttt{recur\_bdd} is included in \texttt{pre\_reach\_bdd} 
+so it's possible to go backward from every recurrent state to some other state also within the 
+same set without leaving \( \neg g \).\\[2ex]
 The solution implements the witness construction algorithm
 as described in the course, with some minor modifications to adapt it to the
-symbolic framework and an additional phase not treated of trace composition.
+symbolic framework, and includes an additional phase for trace composition that was not 
+covered in class. Each phase of the construction is explained in detail below.
 \newpage
-\paragraph{Loop head identification}
-\begin{small}
+\noindent The first step is to identify a loop head from the recurrent set computed above,
+the algorithm implemented was presented during the lectures, but the underlying idea is the 
+following: at this stage, \texttt{recur\_bdd} contains all the states that can be reached 
+infinitely often. Among these, there exists at least one state that can reach itself 
+infinitely often, thus forming a loop.\\[2ex]
+To find such a state, the algorithm iteratively tests each state in \texttt{recur\_bdd}. 
+Starting from a candidate state, it repeatedly applies the post operator (restricted to 
+\texttt{pre\_reach\_bdd}) to explore its successors (i.e., the set of states that can reach 
+the portion of reachable states satisfying \(f \AND \neg g\)) until no new states are found. 
+If the candidate state is included in the set of visited states, then it is selected as 
+the loop head; otherwise, the algorithm proceeds to the next candidate in \texttt{recur\_bdd}.
+\begin{scriptsize}
 \begin{verbatim}
+
     recur_states_list = list(fsm_bdd.pick_all_states(recur_bdd))
     loop_head = recur_states_list.pop(0)
     while True:
-        R = None
         Frontiers = []
         new_bdd = fsm_bdd.post(loop_head).intersection(pre_reach_bdd)
+        R = new_bdd
         while fsm_bdd.count_states(new_bdd) > 0:
-            R = new_bdd if R is None else R.union(new_bdd)
+            R = R.union(new_bdd)
             Frontiers.append(R)
             new_bdd = fsm_bdd.post(new_bdd).intersection(pre_reach_bdd)
             new_bdd = new_bdd.diff(R)
@@ -151,10 +162,21 @@ symbolic framework and an additional phase not treated of trace composition.
             loop_head = recur_states_list.pop(0)
 
 \end{verbatim}
-\end{small}
-
-\paragraph{Loop body construction}
-\begin{small}
+\end{scriptsize}
+\noindent
+Considering all the possible traces starting from the loop head, the layer at step \(i\) is 
+the set of states that can be reached from the loop head in exactly \(i\) steps. 
+The \texttt{Frontiers} list stores these layers. \\[2ex]
+Once the loop head has been identified, the algorithm proceeds to reconstruct the loop body. 
+The goal is to extract one specific trace through the system that starts at some earlier state,
+progresses step by step, and eventually returns to the loop head, thereby forming a cycle.\\[2ex]
+The algorithm first identifies the smallest index \(k\) such that the loop head appears in 
+\texttt{Frontiers[k]}, meaning there is a path of length \(k\) from the loop head back to itself. 
+This defines the loop length. Starting from the loop head, the algorithm then reconstructs the 
+loop by moving backward layer by layer, selecting at each step a predecessor of the current
+state that is in the correct frontier layer, while building the trace for visualization and the 
+loop body. The actual code based on the pseudo-code presented during the course:
+\begin{scriptsize}
 \begin{verbatim}
 
     k = 0
@@ -183,10 +205,14 @@ symbolic framework and an additional phase not treated of trace composition.
     loop = [loop_head] + loop
 
 \end{verbatim}
-\end{small}
-
-\paragraph{Connecting loop and initial states}
-\begin{small}
+\end{scriptsize}
+At this point of the computation the full loop has been indentified. The looping path is inside
+the recurrent set, to finalize the witness the last step is to connect the loop body with one of
+the initial state.\\[2ex]
+The procedure backward searches for an initial state starting from the loop head and saving for 
+each steps the pre-image of the states in the current \texttt{counterex}. The following code realizes 
+this logic symbolically in Python using BDD operations:
+\begin{scriptsize}
 \begin{verbatim}
 
     images = list()
@@ -198,10 +224,20 @@ symbolic framework and an additional phase not treated of trace composition.
         images.insert(0, pre_counterex)
 
 \end{verbatim}
-\end{small}
-
-\paragraph{Trace construction}
-\begin{small}
+\end{scriptsize}
+The final step reconstructs the full counterexample starting from an initial state and 
+leading to the loop head. The algorithm uses the layers computed during the backward 
+search (i.e. \texttt{images}) to build a concrete trace.\\[2ex]
+Beginning with the initial states, at each layer it selects a state that belongs both to the 
+current layer (\texttt{images[i]}) and to the reachable set. Then, it applies the post operator to 
+find successor states and intersects these with the next layer (\texttt{images[i+1]}) to ensure a 
+valid transition.\\[2ex]
+From this, one successor state and the input causing the transition are chosen and recorded. 
+This process repeats until the loop head is reached, effectively creating a concrete prefix that 
+connects the initial state to the start of the loop. Finally, the prefix 
+trace constructed this way is concatenated with the previously built loop body into the final
+output \texttt{witness}. The code below:
+\begin{scriptsize}
 \begin{verbatim}
 
     trace_init = list()
@@ -219,18 +255,8 @@ symbolic framework and an additional phase not treated of trace composition.
     witness = trace_init + trace
 
 \end{verbatim}
-\end{small}
-
-The witness construction is performed as described in the course, with the
-following steps:
-\begin{itemize}
-    \item The loop head is identified as the first state in \texttt{recur\_bdd}.
-    \item The loop body is constructed by iteratively applying the pre operator
-          to the loop head until no new states are found.
-    \item The prefix leading to the loop head is built by applying the post operator
-          to the initial states until the loop head is reached.
-    \item Finally, the trace is constructed by combining the prefix and the loop body.
-    \item The trace is returned as a counterexample to the original property.
-    \item If the property is repeatable, the function returns \texttt{False} and the
-          witness trace; otherwise, it returns \texttt{True} and \texttt{None}.
-\end{itemize}
+\end{scriptsize}
+\noindent The final witness consists of a prefix from the initial state to the loop head,
+followed by the loop that repeatedly violates the property, ensuring the trace satisfies 
+\(\always\eventually f \AND \always\eventually \neg g\), thus falsifying the original implication.
+\subsection{Correctness analysis}

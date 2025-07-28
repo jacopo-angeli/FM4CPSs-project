@@ -160,11 +160,11 @@ def check_react_spec(spec):
                 recur_states_list = list(fsm_bdd.pick_all_states(recur_bdd))
                 loop_head = recur_states_list.pop(0)
                 while True:
-                    R = None
                     Frontiers = []
                     new_bdd = fsm_bdd.post(loop_head).intersection(pre_reach_bdd)
+                    R = new_bdd
                     while fsm_bdd.count_states(new_bdd) > 0:
-                        R = new_bdd if R is None else R.union(new_bdd)
+                        R = R.union(new_bdd)
                         Frontiers.append(R)
                         new_bdd = fsm_bdd.post(new_bdd).intersection(pre_reach_bdd)
                         new_bdd = new_bdd.diff(R)
