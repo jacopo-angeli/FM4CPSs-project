@@ -1,35 +1,12 @@
 \section*{Verification of reactivity properties}
 \subsection*{Problem overview}
-The goal is to develop an algorithm that can verify a specific class of LTL
-properties called reactivity properties. These are formulas of the form
-\[\always\eventually f \implies \always\eventually g\] where \(f\) and \(g\)
-are Boolean formulas without temporal operators.\\[2ex]
-The formula asserts that if the condition \(f\) keeps becoming true infinitely
-often, then the condition \(g\) must also occur infinitely often. The solution
-presented checks whether its negation holds rather than directly proving the
-implication.\\[2ex]
-The negation of the formula \(\always\eventually f \implies \always\eventually
-g\) is \(\always\eventually f \AND \always\eventually \neg g\) that follows
-from the logical equivalence \(f \rightarrow g \equiv \neg f \lor g\), hence
-\(\neg (f \rightarrow g) \equiv f \land \neg g\). Intuitively
-the orignal formula is violated if there is an execution in which \(f\) continues
-to occur infinitely often while \(g\) permanently stops occurring. Instead of 
-proving the implication directly, the algorithm searches for a counterexample 
-to the implication by checking the negation, \\[2ex]
-The solution searches for a cycle in the state space where \(f\) is satisfied 
-and \(g\) is not. Finding such cycle is sufficient to prove
-the property is not valid, and was partially covered during lectures. In short,
-if the formula \(\always\eventually f \AND \lnot g\) is satisfiable, the witness
-is build idnetifying the loop head, then constructing the loop body, builds the
-prefix that leads to it from the initial states, and finally combining
-everything into a concrete trace. This trace acts as a counterexample to the
-original property.
+The goal is to develop an algorithm that can verify a specific class of LTL properties called reactivity properties. These are formulas of the form \[\always\eventually f \implies \always\eventually g\] where \(f\) and \(g\) are Boolean formulas without temporal operators.\\[2ex]
+The formula asserts that if the condition \(f\) keeps becoming true infinitely often, then the condition \(g\) must also occur infinitely often. The solution presented checks whether its negation holds rather than directly proving the implication.\\[2ex]
+The negation of the formula \(\always\eventually f \implies \always\eventually g\) is \(\always\eventually f \AND \always\eventually \neg g\) that follows from the logical equivalence \(f \rightarrow g \equiv \neg f \lor g\), hence \(\neg (f \rightarrow g) \equiv f \land \neg g\). Intuitively the orignal formula is violated if there is an execution in which \(f\) continues to occur infinitely often while \(g\) permanently stops occurring. Instead of proving the implication directly, the algorithm searches for a counterexample to the implication by checking the negation, \\[2ex]
+The solution searches for a cycle in the state space where \(f\) is satisfied and \(g\) is not. Finding such cycle is sufficient to prove the property is not valid, and was partially covered during lectures. In short, if the formula \(\always\eventually f \AND \lnot g\) is satisfiable, the witness is build identifying the loop head, then constructing the loop body, builds the prefix that leads to it from the initial states, and finally combining everything into a concrete trace. This trace acts as a  counterexample to the original property.
 
-\subsection*{Symbolic reactivity check}
-Each portion of the function is breifely introduced with a comment about the logic behind it, 
-and followed by the corresponding code snippet and some consideration on its correctness. 
-Comments and integration to the pseudo-code presented during the course are 
-highlighted in \textcolor{Gray}{gray} and \textcolor{BrickRed}{red} respectively. 
+\subsection*{Symbolic reactivity check function}
+Each portion of the function is breifely introduced with a comment about the logic behind it, and followed by the corresponding code snippet and some consideration on its correctness. Comments and integration to the pseudo-code presented during the course are highlighted in \textcolor{Gray}{gray} and \textcolor{BrickRed}{red} respectively.
 
 \subsubsection*{Sanity check and model preparation}
 The function begins by parsing the input specification to filter non reactivity properties returning \texttt{None}. In case of a valid reactivity formula \(f\) and \(g\) are extracted, and the negation of \(g\) is constructed. The finite state machine is then prepared in BDD form, and both \(f\) and \(\neg g\) are converted into their corresponding BDD representations.
@@ -65,8 +42,9 @@ The usage of \texttt{reachable\_states} from the \texttt{pynusmv} library wasn't
 \end{scriptsize}
 
 \subsubsection*{Symbolic repeatability check}
-The repeatability check essentially computes a fixed point over the reachable state space considering only the transitions that satisfy the input formula, returning a set that remains unchanged under repeated application of the pre-image operator. In each iteration it identifies the set of states that can reach the previous set in a single step, (i.e. their pre-image) starting from the portion of initial states that satisfies \(f \AND \neg g\).\\[2ex]
+The repeatability check essentially computes a fixed point over the reachable state space considering only the transitions that satisfy the input formula, returning a set that remains unchanged under repeated application of the pre-image operator. In each iteration it identifies the set of states that can reach the previous set in a single step, (i.e.\ their pre-image) starting from the portion of initial states that satisfies \(f \AND \neg g\).\\[2ex]
 If the set of states stabilizes, meaning it does not change after applying the pre-image operator, then the property is repeatable and the algorithm returns \texttt{(True, None)}. If instead the set keeps changing, it means that there exists a loop in which \(f\) is satisfied and \(g\) is not, hence the property is not repeatable and a witness can be constructed. The witness construction is treated in the next subsection, hence the following code is the main body of the repeatability check where the witness contruction starting point is indicated by a comment:
+% chktex 36 off
 \begin{scriptsize}
 \begin{Verbatim}[commandchars=\\\{\}]
 
@@ -84,6 +62,8 @@ If the set of states stabilizes, meaning it does not change after applying the p
 
 \end{Verbatim}
 \end{scriptsize}
+% chktex 36 on
+
 About \texttt{recur\_bdd} and \texttt{new\_bdd} initialization, the algorithm focuses on the subset of reachable states satisfying \(f \land \neg g\), hence the intersection with \texttt{ng\_bdd}. urthermore, \texttt{pre\_reach\_bdd} is initialized to \texttt{new\_bdd} as a simplification of the algorithm without affecting its correctness. The first iteration of the while loop will always include \texttt{new\_bdd} in \texttt{pre\_reach\_bdd} anyway, and \(\emptyset \cup \texttt{new\_bdd} = \texttt{new\_bdd}\).
 \newpage
 \subsubsection*{Witness construction}
@@ -193,7 +173,7 @@ The backward-search and forward-extraction together outputs a prefix from an ini
 \end{center}
 such that
 \begin{center}
-\texttt{images[0] }\(\cap\)\texttt{ Init }\(\setminus \ \emptyset\)\texttt{, images[n] = \{loop\_head\}},
+\texttt{images[0] }\(\cap\)\texttt{ Init }\(\setminus \ \emptyset\)\texttt{, images[n] = {loop\_head}}
 \end{center}
 and for each \(0 \le\) \texttt{i} \(< n\), every state in \texttt{images[i]} has at 
 least one successor in 
@@ -201,15 +181,18 @@ least one successor in
 The forward-extraction of the prefix is driven by the list \texttt{images} built during the backward search. The starting point is initialized to the initial states, and then loop from 0 to \texttt{len(image)-1} performing the following steps:
 \begin{enumerate}
   \item Restrict the current reachable set to the \texttt{i}th layer:
+        \scriptsize
         \begin{verbatim}
     start = start.intersection(images[i])
         \end{verbatim}
   \item Compute the next-layer post-image:
+        \scriptsize
         \begin{verbatim}
     post = fsm_bdd.post(start).intersection(images[i+1])
         \end{verbatim}
   \item Extract and appending their string representations to \texttt{trace\_init} one 
         concrete state and the input leading it to the next layer:
+        \scriptsize
         \begin{verbatim}
     trace_init.append(fsm_bdd.pick_one_state(start).get_str_values())
     trace_init.append(fsm_bdd.pick_one_inputs(
@@ -217,6 +200,7 @@ The forward-extraction of the prefix is driven by the list \texttt{images} built
     ).get_str_values())
         \end{verbatim}
   \item Update \texttt{start} as the post variable in preparation for the next iteration:
+        \scriptsize
         \begin{verbatim}
     start = post
         \end{verbatim}
