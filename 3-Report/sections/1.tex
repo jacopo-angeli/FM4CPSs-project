@@ -9,7 +9,9 @@ often, then the condition \(g\) must also occur infinitely often. The solution
 presented checks whether its negation holds rather than directly proving the
 implication.\\[2ex]
 The negation of the formula \(\always\eventually f \implies \always\eventually
-g\) is \(\always\eventually f \AND \always\eventually \neg g\). Intuitively
+g\) is \(\always\eventually f \AND \always\eventually \neg g\) that follows
+from the logical equivalence \(f \rightarrow g \equiv \neg f \lor g\), hence
+\(\neg (f \rightarrow g) \equiv f \land \neg g\). Intuitively
 the orignal formula is violated if there is an execution in which \(f\) continues
 to occur infinitely often while \(g\) permanently stops occurring. Instead of 
 proving the implication directly, the algorithm searches for a counterexample 
@@ -18,141 +20,86 @@ The solution searches for a cycle in the state space where \(f\) is satisfied
 and \(g\) is not. Finding such cycle is sufficient to prove
 the property is not valid, and was partially covered during lectures. In short,
 if the formula \(\always\eventually f \AND \lnot g\) is satisfiable, the witness
-is build identifing the loop head, then constructing the loop body, builds the
+is build idnetifying the loop head, then constructing the loop body, builds the
 prefix that leads to it from the initial states, and finally combining
 everything into a concrete trace. This trace acts as a counterexample to the
 original property.
 
 \subsection{Symbolic reactivity check}
+Each portion of the function is breifely introduced with a comment about the logic behind it, 
+and followed by the corresponding code snippet and some consideration on its correctness. 
+Comments and integration to the pseudo-code presented during the course are 
+highlighted in \textcolor{Gray}{gray} and \textcolor{BrickRed}{red} respectively. 
 
-\paragraph{Sanity check and model preparation}
+\subsubsection*{Sanity check and model preparation}
+The function begins by parsing the input specification to filter non reactivity properties returning \texttt{None}. In case of a valid reactivity formula \(f\) and \(g\) are extracted, and the negation of \(g\) is constructed. The finite state machine is then prepared in BDD form, and both \(f\) and \(\neg g\) are converted into their corresponding BDD representations.
 \begin{scriptsize}
-\begin{verbatim}
-        
+\begin{Verbatim}[commandchars=\\\{\}]
+
     parse_result = parse_react(spec)
     if parse_result is None:
-        return None
-
+    return None
+    
     f, g = parse_result
     ng = pynusmv.prop.not_(g)
-
+    
     fsm_bdd = pynusmv.glob.prop_database().master.bddFsm
     f_bdd = spec_to_bdd(fsm_bdd, f)
     ng_bdd = spec_to_bdd(fsm_bdd, ng)
-    \end{verbatim}
+        
+\end{Verbatim}
 \end{scriptsize}
-The implementation begins by parsing the input specification to ensure it
-matches the required reactivity property form. If the formula does not
-conform, the function exits early. Otherwise, the Boolean formulas
-\(f\) and \(g\) are extracted, and the negation of \(g\) is constructed.
-The finite state machine is then prepared in BDD form, and both \(f\) and
-\(\neg g\) are converted into their corresponding BDD representations.
-This setup enables efficient symbolic manipulation in the subsequent
-verification steps.
 
-\paragraph{Reachable states}
+\subsubsection{Reachable states}
+The usage of \texttt{reachable\_states} from the \texttt{pynusmv} library wasn't allowed for this project, hence the solution implements verbatim the symbolic BFS algorithm presented in Part 7 of the course. The algorithm explores the state space starting from the initial region, by definition reachable and incrementally expanding the set of reachable states by computing successors and discarding already visited states until no new states are found.
 \begin{scriptsize}
 \begin{verbatim}
         
     reach_bdd = fsm_bdd.init
     new_bdd = fsm_bdd.post(reach_bdd)
-    while not new_bdd.equal(reach_bdd.intersection(new_bdd)):
-    reach_bdd = reach_bdd.union(new_bdd.diff(reach_bdd))
-    new_bdd = fsm_bdd.post(reach_bdd)
+    while fsm_bdd.count_states(new_bdd) > 0:
+        new_bdd = fsm_bdd.post(new_bdd).diff(reach_bdd)
+        reach_bdd = reach_bdd.union(new_bdd)
+
 \end{verbatim}
 \end{scriptsize}
-The usage of \texttt{reachable\_states} from the \texttt{pynusmv} library
-wasn't allowed for this project, hence the in the solution implements
-the symbolic BFS algorithm presented in Part 7 of the course. The algorithm
-explores the state space starting from the initial region and incrementally
-expands the set of reachable states by computing successors and discarding
-already visited states:
-\begin{figure}[H]\label{fig:reachability-algorithm}
-    \centering
-    \includegraphics[width=5cm]{../media/symbolic-bfs-algorithm.png}
-    \caption{Symbolic BFS algorithm presented in class.}
-\end{figure}
 
-\paragraph{Symbolic repeatability check}
+\subsubsection*{Symbolic repeatability check}
+The repeatability check essentially computes a fixed point over the reachable state space considering only the transitions that satisfy the input formula, returning a set that remains unchanged under repeated application of the pre-image operator. In each iteration it identifies the set of states that can reach the previous set in a single step, (i.e. their pre-image) starting from the portion of initial states that satisfies \(f \AND \neg g\).\\[2ex]
+If the set of states stabilizes, meaning it does not change after applying the pre-image operator, then the property is repeatable and the algorithm returns \texttt{(True, None)}. If instead the set keeps changing, it means that there exists a loop in which \(f\) is satisfied and \(g\) is not, hence the property is not repeatable and a witness can be constructed. The witness construction is treated in the next subsection, hence the following code is the main body of the repeatability check where the witness contruction starting point is indicated by a comment:
 \begin{scriptsize}
-\begin{verbatim}
+\begin{Verbatim}[commandchars=\\\{\}]
 
-    recur_bdd = reach_bdd.intersection(f_bdd).intersection(ng_bdd)
+    \textcolor{BrickRed}{recur_bdd = reach_bdd.intersection(f_bdd).intersection(ng_bdd)}
     while fsm_bdd.count_states(recur_bdd) > 0:
-        pre_reach_bdd = new_bdd = fsm_bdd.pre(recur_bdd).intersection(ng_bdd)
+        \textcolor{BrickRed}{pre_reach_bdd = new_bdd = fsm_bdd.pre(recur_bdd).intersection(ng_bdd)}
         while fsm_bdd.count_states(new_bdd) > 0:
             pre_reach_bdd = pre_reach_bdd.union(new_bdd)
             if recur_bdd.entailed(pre_reach_bdd):
-                # Here property is repeatable
-                # witness construction
+                \textcolor{Gray}{# witness construction}
                 return (False, witness)
-            new_bdd = (fsm_bdd.pre(new_bdd).diff(pre_reach_bdd)).intersection(ng_bdd)
+            \textcolor{BrickRed}{new_bdd = (fsm_bdd.pre(new_bdd).diff(pre_reach_bdd)).intersection(ng_bdd)}
         recur_bdd = recur_bdd.intersection(pre_reach_bdd)
-    # Here property is not repeatable
     return (True, None)
 
-\end{verbatim}
+\end{Verbatim}
 \end{scriptsize}
-The repeatability check is implemented as described during part 7 of the 
-course. The repeatability check essentially computes a fixed point over the reachable 
-state space considering only the transitions that satisfy the formula.\\[2ex]
-This fixed point is computed by repeatedly applying the pre-image operator. Each iteration 
-identifies the set of states that can reach the previous set in a single step, i.e., 
-their pre-image. If the sequence stabilizes, it indicates a set of states that can 
-reach each other infinitely often, thereby confirming the presence of a potential cycle.
-\begin{itemize}
-    \item \texttt{recur\_bdd} is defined as the intersection of the
-          reachable states, \texttt{f\_bdd}, and \texttt{ng\_bdd},
-          following the outlined strategy.
-    \item \texttt{pre\_reach\_bdd} is reset to \texttt{new\_bdd} instead
-          of the empty set to simplify the implementation. This doesn't affect
-          the correctness of the algorithm since, for each state of \texttt{recur\_bdd}
-          the first initialization of \texttt{pre\_reach\_bdd} is the only difference 
-          from the original, and \(\emptyset \ \cup\) \texttt{new\_bdd} is equivalent to 
-          \texttt{new\_bdd} \(\cup\) \texttt{new\_bdd}.
-\end{itemize}
-\begin{figure}[H]\label{fig:repeatability-algorithm}
-    \centering
-    \includegraphics[width=10cm]{../media/symbolic-repeatability-algorithm.png}
-    \caption{Symbolic repeatability algorithm presented in class.}
-\end{figure}
-
-\paragraph{Witness construction}\hfill\\
-As anticipated above the witness is contructed when \(\always \eventually f 
-\AND \neg g \) is repeatable, that is when beginning from the set of reachable states 
-that satisfy \( f \land \neg g \) (\texttt{recur\_bdd}) and iteratively find states that 
-can reach \texttt{recur\_bdd} without leaving \( \neg g \) \\(\texttt{pre\_reach\_bdd}),
-in the current iteration all \texttt{recur\_bdd} is included in \texttt{pre\_reach\_bdd} 
-so it's possible to go backward from every recurrent state to some other state also within the 
-same set without leaving \( \neg g \).\\[2ex]
-The solution implements the witness construction algorithm
-as described in the course, with some minor modifications to adapt it to the
-symbolic framework, and includes an additional phase for trace composition that was not 
-covered in class. Each phase of the construction is explained in detail below.
+About \texttt{recur\_bdd} and \texttt{new\_bdd} initialization, the algorithm focuses on the subset of reachable states satisfying \(f \land \neg g\), hence the intersection with \texttt{ng\_bdd}. urthermore, \texttt{pre\_reach\_bdd} is initialized to \texttt{new\_bdd} as a simplification of the algorithm without affecting its correctness. The first iteration of the while loop will always include \texttt{new\_bdd} in \texttt{pre\_reach\_bdd} anyway, and \(\emptyset \cup \texttt{new\_bdd} = \texttt{new\_bdd}\).
 \newpage
-\noindent The first step is to identify a loop head from the recurrent set computed above,
-the algorithm implemented was presented during the lectures, but the underlying idea is the 
-following: at this stage, \texttt{recur\_bdd} contains all the states that can be reached 
-infinitely often. Among these, there exists at least one state that can reach itself 
-infinitely often, thus forming a loop.\\[2ex]
-To find such a state, the algorithm iteratively tests each state in \texttt{recur\_bdd}. 
-Starting from a candidate state, it repeatedly applies the post operator (restricted to 
-\texttt{pre\_reach\_bdd}) to explore its successors (i.e., the set of states that can reach 
-the portion of reachable states satisfying \(f \AND \neg g\)) until no new states are found. 
-If the candidate state is included in the set of visited states, then it is selected as 
-the loop head; otherwise, the algorithm proceeds to the next candidate in \texttt{recur\_bdd}.
+\subsubsection*{Witness construction}
+The precondition to enter this portion of the code is that \(f \AND \neg g\) is repeatable. The first step to produce the witness at this point is to identify a loop head from the recurrent set computed above. At this stage in fact, \texttt{recur\_bdd} contains all the states that can be reached infinitely often. Among these, there exists at least one state that can reach \textit{itself} infinitely often, thus forming a loop.\\[2ex]
+To find such a state, the algorithm iteratively tests each state in \texttt{recur\_bdd}. Starting from a candidate state, it repeatedly applies the post operator (restricted to \texttt{pre\_reach\_bdd}) to explore its successors (i.e., the set of states that can reach the portion of reachable states satisfying \(f \AND \neg g\)) until no new states are found. If at any iteration the candidate state is included in the set of visited states, then it is selected as the loop head; otherwise, the algorithm proceeds to the next candidate in \texttt{recur\_bdd}.
 \begin{scriptsize}
-\begin{verbatim}
+\begin{Verbatim}[commandchars=\\\{\}]
 
-    recur_states_list = list(fsm_bdd.pick_all_states(recur_bdd))
     loop_head = recur_states_list.pop(0)
     while True:
-        Frontiers = []
+        \textcolor{BrickRed}{Frontiers = []}
         new_bdd = fsm_bdd.post(loop_head).intersection(pre_reach_bdd)
-        R = new_bdd
+        \textcolor{BrickRed}{R = new_bdd}
         while fsm_bdd.count_states(new_bdd) > 0:
             R = R.union(new_bdd)
-            Frontiers.append(R)
+            \textcolor{BrickRed}{Frontiers.append(R)}
             new_bdd = fsm_bdd.post(new_bdd).intersection(pre_reach_bdd)
             new_bdd = new_bdd.diff(R)
         R = R.intersection(recur_bdd)
@@ -161,102 +108,122 @@ the loop head; otherwise, the algorithm proceeds to the next candidate in \textt
         else:
             loop_head = recur_states_list.pop(0)
 
-\end{verbatim}
+\end{Verbatim}
 \end{scriptsize}
-\noindent
-Considering all the possible traces starting from the loop head, the layer at step \(i\) is 
-the set of states that can be reached from the loop head in exactly \(i\) steps. 
-The \texttt{Frontiers} list stores these layers. \\[2ex]
-Once the loop head has been identified, the algorithm proceeds to reconstruct the loop body. 
-The goal is to extract one specific trace through the system that starts at some earlier state,
-progresses step by step, and eventually returns to the loop head, thereby forming a cycle.\\[2ex]
-The algorithm first identifies the smallest index \(k\) such that the loop head appears in 
-\texttt{Frontiers[k]}, meaning there is a path of length \(k\) from the loop head back to itself. 
-This defines the loop length. Starting from the loop head, the algorithm then reconstructs the 
-loop by moving backward layer by layer, selecting at each step a predecessor of the current
-state that is in the correct frontier layer, while building the trace for visualization and the 
-loop body. The actual code based on the pseudo-code presented during the course:
+The solution is a direct translation of the pseudo-code presented during the course, modified as instructed to keep track of the sequence of frontiers useful to later reconstruct the loop body. \texttt{Frontiers} is initialized as empty and populated iteratively with layers. \texttt{Frontiers[i]} contains all the states that can be reached from the loop head in exactly \(i\) steps. The initialization of \texttt{R} to \texttt{new\_bdd} is instead a pure simplification of the algorithm due to similar easoning to the one used in the repeatability check, since the first iteration of the while loop will always include \texttt{new\_bdd} in \texttt{R} anyway, and \(\emptyset \cup \texttt{new\_bdd} = \texttt{new\_bdd}\).\\[2ex]
+Once the loop head has been identified, the algorithm proceeds to reconstruct the loop body. The goal is to extract one specific trace through the system that starts at some earlier state, progresses step by step, and eventually returns to the loop head, thereby forming a cycle.\\[2ex]
+The algorithm first identifies the smallest index \(k\) such that the loop head appears in \texttt{Frontiers[k]}, meaning there is a path of length \(k\) from the loop head back to itself. This defines the loop length (\texttt{k}). Starting from the loop head, the algorithm then reconstructs the loop by moving backward layer by layer, selecting at each step a predecessor of the current state that is in the correct frontier layer, while building the trace for visualization and the loop body. Below the python code that is strangely naturally divided by the end of the page:
 \begin{scriptsize}
-\begin{verbatim}
+\begin{Verbatim}[commandchars=\\\{\}]
 
     k = 0
     while not loop_head.entailed(Frontiers[k]):
         k += 1
+    
+
     loop = [loop_head]
-    trace = [loop_head.get_str_values()]
     curr = loop_head
+    {\color{BrickRed}trace = [loop_head.get_str_values()]}
     for i in range(k - 1, -1, -1):
         Pred = fsm_bdd.pre(curr).intersection(Frontiers[i])
         curr = fsm_bdd.pick_one_state(Pred)
-        trace = [
-            curr.get_str_values(),
-            fsm_bdd.pick_one_inputs(
-                fsm_bdd.get_inputs_between_states(curr, loop[0])
-            ).get_str_values(),
-        ] + trace
         loop = [curr] + loop
+        {\color{BrickRed}trace = [}
+            {\color{BrickRed}curr.get_str_values(),}
+            {\color{BrickRed}fsm_bdd.pick_one_inputs(}
+                {\color{BrickRed}fsm_bdd.get_inputs_between_states(curr, loop[0])}
+            {\color{BrickRed}).get_str_values(),}
+        {\color{BrickRed}] + trace}
 
-    trace = [
-        loop_head.get_str_values(),
-        fsm_bdd.pick_one_inputs(
-            fsm_bdd.get_inputs_between_states(loop_head, loop[0])
-        ).get_str_values(),
-    ] + trace
     loop = [loop_head] + loop
+    {\color{BrickRed}trace = [}
+        {\color{BrickRed}loop_head.get_str_values()},
+        {\color{BrickRed}fsm_bdd.pick_one_inputs(}
+            {\color{BrickRed}fsm_bdd.get_inputs_between_states(loop_head, loop[0])}
+        {\color{BrickRed}).get_str_values(),}
+    {\color{BrickRed}] + trace}
 
-\end{verbatim}
+\end{Verbatim}
 \end{scriptsize}
-At this point of the computation the full loop has been indentified. The looping path is inside
-the recurrent set, to finalize the witness the last step is to connect the loop body with one of
-the initial state.\\[2ex]
-The procedure backward searches for an initial state starting from the loop head and saving for 
-each steps the pre-image of the states in the current \texttt{counterex}. The following code realizes 
-this logic symbolically in Python using BDD operations:
+The code above is actually a direct translation of the pseudo-code presented during the course, with the addition of the \texttt{trace} variable to store the concrete trace for visualization purposes. The trace is built by concatenating the string representation of the current state and the input that leads to the next state, ensuring that the trace reflects the actual transitions taken in the system.\\[2ex] 
+The final step in constructing the counterexample witness involves generating a concrete path from an initial state to the previously identified loop head. The solution implements two sequential traversals:
+\begin{itemize}
+    \item a backward search begins from the loop head and repeatedly applies the pre-image operator 
+          to symbolically compute the set of states that can reach the current set in one transition.
+          This process continues until a state intersecting with the set of initial states is found, 
+          and the sequence of sets (stored in \texttt{images}) effectively encodes a path backward 
+          from the loop to the initial state space,
+    \item To obtain a concrete, step-by-step trace, the forward traversal is applied to the computed 
+          \texttt{images}: at each layer, the intersection with the current reachable states and the 
+          post-image is used to extract one possible transition. A concrete state and the corresponding 
+          input leading to the next state are then appended to \texttt{trace\_init}, reconstructing the 
+          prefix of the counterexample.
+\end{itemize}
+Finally, the prefix (\texttt{trace\_init}) and the loop body (\texttt{trace}) are concatenated into a single sequence (\texttt{witness}). 
 \begin{scriptsize}
-\begin{verbatim}
+\begin{Verbatim}[commandchars=\\\{\}]
 
-    images = list()
-    counterex = pre_counterex = loop_head
-    images.append(counterex)
-    while not pre_counterex.intersected(fsm_bdd.init):
-        counterex = pre_counterex
-        pre_counterex = fsm_bdd.pre(counterex)
-        images.insert(0, pre_counterex)
+    {\color{BrickRed}images = list()}
+    {\color{BrickRed}counterex = pre_counterex = loop_head}
+    {\color{BrickRed}images.append(counterex)}
+    {\color{BrickRed}while not pre_counterex.intersected(fsm_bdd.init):}
+        {\color{BrickRed}counterex = pre_counterex}
+        {\color{BrickRed}pre_counterex = fsm_bdd.pre(counterex)}
+        {\color{BrickRed}images.insert(0, pre_counterex)}
 
-\end{verbatim}
+    {\color{BrickRed}trace_init = list()}
+    {\color{BrickRed}start = fsm_bdd.init}
+    {\color{BrickRed}for i in range(0, len(images) - 1):}
+        {\color{BrickRed}start = start.intersection(images[i])}
+        {\color{BrickRed}post = fsm_bdd.post(start).intersection(images[i + 1])}
+        {\color{BrickRed}trace_init.append(fsm_bdd.pick_one_state(start).get_str_values())}
+        {\color{BrickRed}trace_init.append(}
+            {\color{BrickRed}fsm_bdd.pick_one_inputs(}
+                {\color{BrickRed}fsm_bdd.get_inputs_between_states(start, post)}
+            {\color{BrickRed}).get_str_values()}
+        {\color{BrickRed})}
+        {\color{BrickRed}start = post}
+    {\color{BrickRed}witness = trace_init + trace}
+
+\end{Verbatim}
 \end{scriptsize}
-The final step reconstructs the full counterexample starting from an initial state and 
-leading to the loop head. The algorithm uses the layers computed during the backward 
-search (i.e. \texttt{images}) to build a concrete trace.\\[2ex]
-Beginning with the initial states, at each layer it selects a state that belongs both to the 
-current layer (\texttt{images[i]}) and to the reachable set. Then, it applies the post operator to 
-find successor states and intersects these with the next layer (\texttt{images[i+1]}) to ensure a 
-valid transition.\\[2ex]
-From this, one successor state and the input causing the transition are chosen and recorded. 
-This process repeats until the loop head is reached, effectively creating a concrete prefix that 
-connects the initial state to the start of the loop. Finally, the prefix 
-trace constructed this way is concatenated with the previously built loop body into the final
-output \texttt{witness}. The code below:
-\begin{scriptsize}
-\begin{verbatim}
-
-    trace_init = list()
-    start = fsm_bdd.init  # Start from initial states
-    for i in range(0, len(images) - 1):
-        start = start.intersection(images[i])
-        post = fsm_bdd.post(start).intersection(images[i + 1])
-        trace_init.append(fsm_bdd.pick_one_state(start).get_str_values())
-        trace_init.append(
-            fsm_bdd.pick_one_inputs(
-                fsm_bdd.get_inputs_between_states(start, post)
-            ).get_str_values()
-        )
-        start = post
-    witness = trace_init + trace
-
-\end{verbatim}
-\end{scriptsize}
-\noindent The final witness consists of a prefix from the initial state to the loop head,
-followed by the loop that repeatedly violates the property, ensuring the trace satisfies 
-\(\always\eventually f \AND \always\eventually \neg g\), thus falsifying the original implication.
-\subsection{Correctness analysis}
+The backward-search and forward-extraction together outputs a prefix from an initial state to the loop head, by construction the result of the former is a sequence of BDDs
+\begin{center}
+\texttt{images[0],…,images[n]}
+\end{center}
+such that
+\begin{center}
+\texttt{images[0] }\(\cap\)\texttt{ Init }\(\setminus \ \emptyset\)\texttt{, images[n] = \{loop\_head\}},
+\end{center}
+and for each \(0 \le\) \texttt{i} \(< n\), every state in \texttt{images[i]} has at 
+least one successor in 
+\texttt{images[i+1]}.\\[2ex]
+The forward-extraction of the prefix is driven by the list \texttt{images} built during the backward search. The starting point is initialized to the initial states, and then loop from 0 to \texttt{len(image)-1} performing the following steps:
+\begin{enumerate}
+  \item Restrict the current reachable set to the \texttt{i}th layer:
+        \begin{verbatim}
+    start = start.intersection(images[i])
+        \end{verbatim}
+  \item Compute the next-layer post-image:
+        \begin{verbatim}
+    post = fsm_bdd.post(start).intersection(images[i+1])
+        \end{verbatim}
+  \item Extract and appending their string representations to \texttt{trace\_init} one 
+        concrete state and the input leading it to the next layer:
+        \begin{verbatim}
+    trace_init.append(fsm_bdd.pick_one_state(start).get_str_values())
+    trace_init.append(fsm_bdd.pick_one_inputs(
+        fsm_bdd.get_inputs_between_states(start, post)
+    ).get_str_values())
+        \end{verbatim}
+  \item Update \texttt{start} as the post variable in preparation for the next iteration:
+        \begin{verbatim}
+    start = post
+        \end{verbatim}
+\end{enumerate}
+At the end of the loop \texttt{trace\_init} contains a concrete sequence  
+\[
+[s_0, a_0, s_1, a_1, \dots, s_{n-1}, a_{n-1}, s_n]
+\]
+where \(s_0\in\texttt{images[0]}\cap\texttt{fsm\_bdd.init}\) and \(s_n=\texttt{loop\_head}\), hence a looping execution in a form of a tuple of alternating states and inputs, starting and ending with a state, where the last state is in the sequence and indicate the starting point of the loop.\\[2ex]  
+Finally \texttt{witness = trace\_init + trace} concatenates the prefix with the loop body. At this point, \texttt{witness} contains a concrete counterexample trace that demonstrates the violation of the reactivity property. At this point the symbolic reactivity check function ends and returns \texttt{(False, witness)}.
