@@ -1,5 +1,5 @@
-\section{Verification of reactivity properties}
-\subsection{Problem overview}
+\section*{Verification of reactivity properties}
+\subsection*{Problem overview}
 The goal is to develop an algorithm that can verify a specific class of LTL
 properties called reactivity properties. These are formulas of the form
 \[\always\eventually f \implies \always\eventually g\] where \(f\) and \(g\)
@@ -25,7 +25,7 @@ prefix that leads to it from the initial states, and finally combining
 everything into a concrete trace. This trace acts as a counterexample to the
 original property.
 
-\subsection{Symbolic reactivity check}
+\subsection*{Symbolic reactivity check}
 Each portion of the function is breifely introduced with a comment about the logic behind it, 
 and followed by the corresponding code snippet and some consideration on its correctness. 
 Comments and integration to the pseudo-code presented during the course are 
@@ -50,7 +50,7 @@ The function begins by parsing the input specification to filter non reactivity 
 \end{Verbatim}
 \end{scriptsize}
 
-\subsubsection{Reachable states}
+\subsubsection*{Reachable states}
 The usage of \texttt{reachable\_states} from the \texttt{pynusmv} library wasn't allowed for this project, hence the solution implements verbatim the symbolic BFS algorithm presented in Part 7 of the course. The algorithm explores the state space starting from the initial region, by definition reachable and incrementally expanding the set of reachable states by computing successors and discarding already visited states until no new states are found.
 \begin{scriptsize}
 \begin{verbatim}
