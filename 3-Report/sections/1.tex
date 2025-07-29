@@ -1,31 +1,11 @@
 \section{Verification of reactivity properties}
 \subsection{Problem overview}
-The goal is to develop an algorithm that can verify a specific class of LTL
-properties called reactivity properties. These are formulas of the form
-\[\always\eventually f \implies \always\eventually g\] where \(f\) and \(g\)
-are Boolean formulas without temporal operators.\\[2ex]
-The formula asserts that if the condition \(f\) keeps becoming true infinitely
-often, then the condition \(g\) must also occur infinitely often. The solution
-presented checks whether its negation holds rather than directly proving the
-implication.\\[2ex]
-The negation of the formula \(\always\eventually f \implies \always\eventually
-g\) is \(\always\eventually f \AND \always\eventually \neg g\) that follows
-from the logical equivalence \(f \rightarrow g \equiv \neg f \lor g\), hence
-\(\neg (f \rightarrow g) \equiv f \land \neg g\). Intuitively
-the orignal formula is violated if there is an execution in which \(f\) continues
-to occur infinitely often while \(g\) permanently stops occurring. Instead of 
-proving the implication directly, the algorithm searches for a counterexample 
-to the implication by checking the negation, \\[2ex]
-The solution searches for a cycle in the state space where \(f\) is satisfied 
-and \(g\) is not. Finding such cycle is sufficient to prove
-the property is not valid, and was partially covered during lectures. In short,
-if the formula \(\always\eventually f \AND \lnot g\) is satisfiable, the witness
-is build idnetifying the loop head, then constructing the loop body, builds the
-prefix that leads to it from the initial states, and finally combining
-everything into a concrete trace. This trace acts as a counterexample to the
-original property.
+The goal is to develop an algorithm that can verify a specific class of LTL properties called reactivity properties. These are formulas of the form \[\always\eventually f \implies \always\eventually g\] where \(f\) and \(g\) are Boolean formulas without temporal operators.\\[2ex]
+The formula asserts that if the condition \(f\) keeps becoming true infinitely often, then the condition \(g\) must also occur infinitely often. The solution presented checks whether its negation holds rather than directly proving the implication.\\[2ex]
+The negation of the formula \(\always\eventually f \implies \always\eventually g\) is \(\always\eventually f \AND \always\eventually \neg g\) that follows from the logical equivalence \(f \rightarrow g \equiv \neg f \lor g\), hence \(\neg (f \rightarrow g) \equiv f \land \neg g\). Intuitively the orignal formula is violated if there is an execution in which \(f\) continues to occur infinitely often while \(g\) permanently stops occurring. Instead of proving the implication directly, the algorithm searches for a counterexample to the implication by checking the negation, \\[2ex]
+The solution searches for a cycle in the state space where \(f\) is satisfied and \(g\) is not. Finding such cycle is sufficient to prove the property is not valid, and was partially covered during lectures. In short, if the formula \(\always\eventually f \AND \lnot g\) is satisfiable, the witness is build identifying the loop head, then constructing the loop body, builds the prefix that leads to it from the initial states, and finally combining everything into a concrete trace. This trace acts as a  counterexample to the original property.
 
-\subsection{Symbolic reactivity check}
+\subsection{Symbolic reactivity check function}
 Each portion of the function is breifely introduced with a comment about the logic behind it, 
 and followed by the corresponding code snippet and some consideration on its correctness. 
 Comments and integration to the pseudo-code presented during the course are 
