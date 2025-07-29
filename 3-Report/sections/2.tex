@@ -1,1 +1,13 @@
 \section*{Supervisory control}
+\subsection*{Uncontrolled plant design}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{/2/UncontrolledPlantWGraphic.png}
+    \caption{Cabin automata.}
+\end{figure}
+The uncontrolled plant consists of five automata: the cabin, the door, and a button for each floor.\\[2ex]
+The cabin automata has \texttt{{F0,F1,F2}} all marked states (to better represent an elevator other choice would have worked correctly like marking only \texttt{F0}, ...) representing the current floor of the cabin, the initial state is \texttt{F0}. The events \texttt{{up0, up1, down2, down1}} of the automata are all controllable and are choosing to represent movement and destination (from the source).\\[2ex]
+The door automata has two states \texttt{{open,closed}}, the initial state and only marked state is \texttt{closed}, and two events that allows the automata to move between states \texttt{{open, close}}, both controllable.\\[2ex]
+The uncontrolled plant present a button automata for each floor, each automata has two states \texttt{{Idle, Called}} and the initial and only marked one is \texttt{Idle}. Each automata can transition to the \texttt{Called} state with the uncontrollable event \texttt{call\textsubscript{i}}, and get back to \texttt{Idle} with the instead controllable event \texttt{reset\textsubscript{i}}.\\[2ex]
+
+\subsection*{Requirements}
