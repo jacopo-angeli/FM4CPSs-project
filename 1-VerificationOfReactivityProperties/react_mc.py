@@ -143,9 +143,9 @@ def check_react_spec(spec):
     # Reach-set ---------------------------------------------------------------------------
     reach_bdd = fsm_bdd.init
     new_bdd = fsm_bdd.post(reach_bdd)
-    while not new_bdd.equal(reach_bdd.intersection(new_bdd)):
-        reach_bdd = reach_bdd.union(new_bdd.diff(reach_bdd))
-        new_bdd = fsm_bdd.post(reach_bdd)
+    while fsm_bdd.count_states(new_bdd) > 0:
+        new_bdd = fsm_bdd.post(new_bdd).diff(reach_bdd)
+        reach_bdd = reach_bdd.union(new_bdd)
     # -------------------------------------------------------------------------------------
 
     # Symbolic repeatability check of f & !g ----------------------------------------------
