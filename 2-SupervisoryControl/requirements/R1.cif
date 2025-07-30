@@ -4,10 +4,11 @@ requirement R1:
     location Closed:
         initial;
         marked;
-        edge up0, up1, down1, down2;
-        edge open   goto Open;
+        edge up0, up1, down1, down2, call0, call1, call2;
+        edge open goto Open;
 
     location Open:
         marked;
-        edge close  goto Closed;
+        edge call0, call1, call2;
+        edge close goto Closed;
 end

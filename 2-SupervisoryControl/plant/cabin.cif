@@ -7,12 +7,10 @@ plant Cabin:
         edge up0 goto F1;
 
     location F1:
-        marked;
         edge up1 goto F2;
         edge down1 goto F0;
 
     location F2:
-        marked;
         edge down2 goto F1;
 
 end
