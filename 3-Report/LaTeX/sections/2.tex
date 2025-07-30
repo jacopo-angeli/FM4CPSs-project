@@ -1,0 +1,63 @@
+\section*{Supervisory control}
+\subsection*{Uncontrolled plant design}
+The uncontrolled plant consists of five automata: the cabin, the door, and a button for each floor.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{/2/UncontrolledPlantWGraphic.png}
+    \caption{Cabin, door and buttons automata.}
+\end{figure}\noindent 
+The cabin automaton has three states \{\texttt{F0,F1,F2}\} representing the current floor of the cabin, the initial and only marked state is \texttt{F0}. The events \{\texttt{up0, up1, down2, down1}\} of the automaton are all controllable and represent type of movement and source floor.\\[2ex]
+The door automaton has two states \{\texttt{open,closed}\}, the initial state and only marked state is \texttt{closed}, and two controllable events \{\texttt{open, close}\} that allows the automaton to move between states.\\[2ex]
+The uncontrolled plant presents a button for each floor, each automaton has two states \{\texttt{Idle, Called}\} and the initial and only marked one is \texttt{Idle}. Each automaton can transition to the \texttt{Called} state with the uncontrollable event \texttt{call\textsubscript{i}}, and get back to \texttt{Idle} with the instead controllable event \texttt{reset\textsubscript{i}}.
+% \subsubsection*{On the choice of states and events}
+% The initial state of the cabin is \texttt{F0}, which is also the only marked state, the idea behind the choice is that the ground level is the least stressing position for the elevator to stay idle. Similar reasoning applies to door and buttons automata. On a more serious note the controller syntesis force the plant to always be able to transition towards marked states. 
+
+\subsection*{Requirements}
+The first requirement is to ensure that the cabin can only move when the door is closed. It can be expressed using temporal logic as follows:
+\[
+\always(\texttt{Door.Open} \implies \neg\texttt{(Cabin.Moving)  } \until \texttt{  Door.Close})
+\]
+Or, in other words, whenever its door is open the cabin must not move until the door is closed again.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{/2/FirstRequirement.png}
+    \caption{First requirement automaton.}
+\end{figure}\noindent 
+The event set \texttt{Cabin.Moving} includes \{\texttt{up0, up1, down1, down2}\}, and in the proposed solution, the first requirement automaton (\texttt{R1}) disables them whenever the door is open.\\[2ex]
+The second requirement ensures that if the button corresponding to a floor is pressed, that floor is eventually served. Serving a floor is the process of opening and closing the door of the cabin.
+The implementation distinguishes between two situations for each floor: \texttt{AtF\textsubscript{i}} and \texttt{NotF\textsubscript{i}}, which indicate whether the cabin is at floor \texttt{F\textsubscript{i}} or not, respectively.
+\begin{itemize}
+    \item If the button \texttt{i} is called occurs while the cabin is in \texttt{AtF\textsubscript{i}}, the floor is immediately served.
+    \item If the call occurs while in \texttt{NotF\textsubscript{i}}, a third state is used as a flag to indicate that the floor was requested while the cabin was away. In this case, service is triggered only when a movement event brings the cabin to the floor:
+    \begin{itemize}
+        \item \texttt{down1} for \texttt{F\textsubscript{0}},
+        \item \{\texttt{up0, down2}\} for \texttt{F\textsubscript{1}},
+        \item \texttt{up1} for \texttt{F\textsubscript{2}}.
+    \end{itemize}
+\end{itemize}
+The serving of a floor \texttt{i} consists of the following ordered sequence: first, the door is opened (\texttt{open}), then closed (\texttt{close}), and finally the button is reset (\texttt{reset\textsubscript{i}}) to indicate the floor has been served. The automaton enforces this specific event order, while allowing the uncontrollable events \texttt{call\textsubscript{i}} to occur at any time. A graphical representation of the second requirement is included below.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{/2/R2.png}
+    \caption{Second requirement automaton for first floor.}
+\end{figure}\noindent 
+
+\subsubsection*{Marking and controllability choices}
+The cabin automaton uses states \texttt{F0}, \texttt{F1}, and \texttt{F2} to explicitly represent the cabin's position. The decision to make \texttt{F0} the only marked state is based on practical assumption since the absence of constraints by the homework text. Marking only \texttt{F0} also simplifies supervisory synthesis, as the plant must always be able to return to a marked state to ensure nonblocking behavior.\\[2ex]
+The door automaton's states \texttt{open} and \texttt{closed} are minimal yet sufficient to for the scope of the project. The controllability of \texttt{open} and \texttt{close} is essential for the first requirement other than reflecting the physical reality of an elevator door.\\[2ex]
+Each button automaton has a simple structure with two states: \texttt{Idle} and \texttt{Called}. The event \texttt{call\textsubscript{i}} is modeled as uncontrollable since it is an input from the external plant. Conversely, \texttt{reset\textsubscript{i}} is controllable because it is triggered by the elevator controller's logic after the system has served the corresponding floor.
+
+\subsection*{Graphical interface}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{/2/GraphicalInterface.png}
+    \caption{Graphical interface of the uncontrolled plant.}
+\end{figure}\noindent
+The SVG file for the graphical interface is manually adapted from an AI-generated output and provides a simple representation of the system. Manual adaptations included correcting element positions, adjusting colors to match automaton states, and ensuring all graphical components accurately reflect the system's logic.\\[2ex]
+The cabin automaton controls the \texttt{y} attribute of the cabin element in the SVG, using a basic conditional to assign predefined altitude values corresponding to each floor. These values position the cabin appropriately within the graphical layout.\\[2ex]
+The cabin graphic element set includes both door sections. The \texttt{x} attributes of these sections are set to fixed values that reflect the current state of the door automaton, similarly to the cabin element, through conditional statements.\\[2ex]
+Each button is composed of two concentric circles: an outer, darker circle and an inner colored circle. The color of the inner circle indicates the current state of the corresponding button automaton and is managed by a conditional. A red inner circle represents the \texttt{Idle} state, while a green inner circle represents the \texttt{Called} state.\\[2ex]
+
+\subsection*{Controller synthesis}
+The controller synthesis process is performed using the \texttt{cifsupsynth} tool from the CIF (Compositional Interchange Format) toolset.\\[2ex]
+The synthesis begins by merging the uncontrolled plant with the two requirement automata (\texttt{R1} and \texttt{R2}) using \texttt{cifmerge}. Once merged, the \texttt{cifsupsynth} tool is used to generate the supervisor into \texttt{supervisor.cif} file. Finally, the controlled plant is obtained by merging the uncontrolled plant with the synthesized supervisor.
