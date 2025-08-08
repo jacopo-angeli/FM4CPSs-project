@@ -44,7 +44,7 @@ The usage of \texttt{reachable\_states} from the \texttt{pynusmv} library wasn't
 \subsubsection*{Symbolic repeatability check}
 The repeatability check essentially computes a fixed point over the reachable state space considering only the transitions that satisfy the input formula, returning a set that remains unchanged under repeated application of the pre-image operator. In each iteration it identifies the set of states that can reach the previous set in a single step, (i.e.\ their pre-image) starting from the portion of initial states that satisfies \(f \AND \neg g\).\\[2ex]
 If the set of states stabilizes, meaning it does not change after applying the pre-image operator, then the property is repeatable and the algorithm returns \texttt{(True, None)}. If instead the set keeps changing, it means that there exists a loop in which \(f\) is satisfied and \(g\) is not, hence the property is not repeatable and a witness can be constructed. The witness construction is treated in the next subsection, hence the following code is the main body of the repeatability check where the witness contruction starting point is indicated by a comment:
-% chktex 36 off
+
 \begin{scriptsize}
 \begin{Verbatim}[commandchars=\\\{\}]
 
@@ -62,8 +62,6 @@ If the set of states stabilizes, meaning it does not change after applying the p
 
 \end{Verbatim}
 \end{scriptsize}
-% chktex 36 on
-
 About \texttt{recur\_bdd} and \texttt{new\_bdd} initialization, the algorithm focuses on the subset of reachable states satisfying \(f \land \neg g\), hence the intersection with \texttt{ng\_bdd}.\
 Furthermore, \texttt{pre\_reach\_bdd} is initialized to \texttt{new\_bdd} as a simplification of the algorithm without affecting its correctness. The first iteration of the while loop will always include \texttt{new\_bdd} in \texttt{pre\_reach\_bdd} anyway, and \(\emptyset \cup \texttt{new\_bdd} = \texttt{new\_bdd}\).
 \subsubsection*{Witness construction}
